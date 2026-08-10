@@ -1,4 +1,7 @@
-// GenZ Live — Prisma Schema for MySQL Database
+// ================================================================
+// GenZ Live — Prisma Schema (MySQL)
+// Production-grade database schema for a global digital news platform
+// ================================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -9,48 +12,398 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Category {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  name      String
-  icon      String
-  articles  Article[]
-  createdAt DateTime @default(now())
+// ================================================================
+// ENUMS
+// ================================================================
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  AUTHOR
+  VIEWER
 }
+
+enum ArticleStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+enum VideoStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  OTHER
+}
+
+// ================================================================
+// USER — Platform administrators and editorial staff
+// ================================================================
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  password    String    /// bcrypt hashed
+  name        String
+  role        UserRole  @default(EDITOR)
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  author          Author?       /// One-to-one: a User can be an Author
+  auditLogs       AuditLog[]
+  mediaUploads    Media[]
+  settingsUpdated SiteSetting[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// ================================================================
+// AUTHOR — Editorial writer profiles (can be linked to a User)
+// ================================================================
+
+model Author {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  bio       String?   @db.Text
+  avatar    String?
+  email     String?   @unique
+  twitter   String?
+  instagram String?
+  website   String?
+  isActive  Boolean   @default(true)
+
+  // Optional link to a platform User account
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Relations
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("authors")
+}
+
+// ================================================================
+// CATEGORY — News categories (World, India, Tech, AI, etc.)
+// ================================================================
+
+model Category {
+  id              String  @id @default(cuid())
+  slug            String  @unique
+  name            String
+  description     String?
+  icon            String? /// Emoji or icon identifier
+  color           String? /// Hex color for UI theming
+  metaTitle       String?
+  metaDescription String? @db.Text
+  isActive        Boolean @default(true)
+  sortOrder       Int     @default(0)
+
+  // Relations
+  articles Article[]
+  videos   Video[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@index([createdAt])
+  @@map("categories")
+}
+
+// ================================================================
+// TAG — Keyword tags for articles
+// ================================================================
+
+model Tag {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  description String?
+
+  // Relations
+  articleTags ArticleTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([createdAt])
+  @@map("tags")
+}
+
+// ================================================================
+// ARTICLE — Core news article entity
+// ================================================================
 
 model Article {
-  id           String    @id @default(cuid())
-  slug         String    @unique
-  title        String    @db.Text
-  subtitle     String?   @db.Text
-  content      String    @db.LongText
-  categorySlug String
-  category     Category  @relation(fields: [categorySlug], references: [slug])
-  author       String
-  authorRole   String?
-  authorAvatar String?
-  publishedAt  String
-  readTime     String
-  views        String    @default("0")
-  likes        Int       @default(0)
-  image        String
-  isFeatured   Boolean   @default(false)
-  comments     Comment[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  subtitle        String?
+  excerpt         String?       @db.Text  /// Short summary for cards and SEO
+  content         String        @db.LongText
+  status          ArticleStatus @default(DRAFT)
+  publishedAt     DateTime?
+  scheduledAt     DateTime?     /// For SCHEDULED status
+  featuredImage   String?
+  isFeatured      Boolean       @default(false)
+  isBreaking      Boolean       @default(false)
+  views           Int           @default(0)
+  likes           Int           @default(0)
+  readTime        String?       /// e.g. "4 min read"
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?       @db.Text
+
+  // Foreign Keys
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  authorId String
+  author   Author @relation(fields: [authorId], references: [id])
+
+  sourceId String?
+  source   Source? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  // Relations
+  tags  ArticleTag[]
+  media Media[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([scheduledAt])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([isFeatured])
+  @@index([isBreaking])
+  @@index([createdAt])
+  @@map("articles")
 }
+
+// ================================================================
+// ARTICLE_TAG — Many-to-many pivot: Articles ↔ Tags
+// ================================================================
+
+model ArticleTag {
+  articleId String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  tagId String
+  tag   Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  assignedAt DateTime @default(now())
+
+  @@id([articleId, tagId])
+  @@index([articleId])
+  @@index([tagId])
+  @@map("article_tags")
+}
+
+// ================================================================
+// SOURCE — External news sources and citation references
+// ================================================================
+
+model Source {
+  id         String  @id @default(cuid())
+  name       String
+  url        String?
+  domain     String?
+  isReliable Boolean @default(true)
+
+  // Relations
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([domain])
+  @@index([isReliable])
+  @@map("sources")
+}
+
+// ================================================================
+// VIDEO — YouTube videos and live streams
+// ================================================================
+
+model Video {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  title       String
+  description String?     @db.Text
+  youtubeId   String      @unique /// YouTube video ID (e.g. dQw4w9WgXcQ)
+  thumbnail   String?
+  duration    String?     /// e.g. "14:25" or "LIVE"
+  views       Int         @default(0)
+  status      VideoStatus @default(DRAFT)
+  isLive      Boolean     @default(false)
+  publishedAt DateTime?
+
+  // Optional category association
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([isLive])
+  @@index([categoryId])
+  @@index([createdAt])
+  @@map("videos")
+}
+
+// ================================================================
+// BREAKING_NEWS — Ticker items shown in the top breaking bar
+// ================================================================
+
+model BreakingNews {
+  id        String    @id @default(cuid())
+  text      String
+  category  String    /// Display label (e.g. "AI", "India", "Markets")
+  isActive  Boolean   @default(true)
+  sortOrder Int       @default(0)
+  expiresAt DateTime? /// Auto-deactivate after this time
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([expiresAt])
+  @@index([sortOrder])
+  @@index([createdAt])
+  @@map("breaking_news")
+}
+
+// ================================================================
+// MEDIA — Images and assets uploaded to the platform
+// ================================================================
+
+model Media {
+  id       String    @id @default(cuid())
+  filename String
+  url      String
+  mimeType String
+  fileSize Int       /// Bytes
+  type     MediaType @default(IMAGE)
+  alt      String?
+  caption  String?
+
+  // Optional article association
+  articleId String?
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+
+  // Uploader
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([articleId])
+  @@index([uploadedById])
+  @@index([type])
+  @@index([mimeType])
+  @@index([createdAt])
+  @@map("media")
+}
+
+// ================================================================
+// NEWSLETTER_SUBSCRIBER — Email subscribers
+// ================================================================
 
 model NewsletterSubscriber {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id             String    @id @default(cuid())
+  email          String    @unique
+  isActive       Boolean   @default(true)
+  source         String?   /// e.g. "homepage", "article-cta", "popup"
+  confirmedAt    DateTime? /// Double opt-in confirmation timestamp
+  unsubscribedAt DateTime?
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([isActive])
+  @@index([source])
+  @@index([createdAt])
+  @@map("newsletter_subscribers")
 }
 
-model Comment {
-  id        String   @id @default(cuid())
-  articleId String
-  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  user      String
-  text      String   @db.Text
+// ================================================================
+// SITE_SETTING — Key-value store for admin-configurable settings
+// ================================================================
+
+model SiteSetting {
+  id          String  @id @default(cuid())
+  key         String  @unique /// e.g. "site.name", "seo.default_og_image"
+  value       String  @db.Text
+  description String?
+  group       String? /// e.g. "general", "seo", "social", "ads"
+
+  // Who last updated this setting
+  updatedById String?
+  updatedBy   User?   @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([group])
+  @@map("site_settings")
+}
+
+// ================================================================
+// AUDIT_LOG — Immutable record of all admin actions
+// ================================================================
+
+model AuditLog {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id])
+  action     String  /// e.g. "ARTICLE_PUBLISHED", "USER_CREATED"
+  entityType String  /// e.g. "Article", "User", "Category"
+  entityId   String? /// ID of affected record
+  oldData    Json?   /// Snapshot before change
+  newData    Json?   /// Snapshot after change
+  ipAddress  String?
+  userAgent  String?
+
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
