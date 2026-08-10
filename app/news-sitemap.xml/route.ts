@@ -6,6 +6,7 @@
 
 import { SITE_CONFIG } from '@/config/site';
 import { getLatestArticles } from '@/lib/dataAccess';
+import { stripHtml } from '@/lib/sanitizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -20,12 +21,16 @@ export async function GET(): Promise<Response> {
 
   // Filter to articles published within the last 2 days
   const recentArticles = articles.filter(a => {
-    if (!a.publishedAtRaw) return true; // include if no date available
+    if (!a.publishedAtRaw) return true;
     const d = new Date(a.publishedAtRaw);
     return d >= twoDaysAgo && d <= now;
   });
 
-  const items = recentArticles.map(a => `
+  const items = recentArticles.map(a => {
+    const titleClean = stripHtml(a.title).replace(/]]>/g, ']]&gt;');
+    const pubDateIso = a.publishedAtRaw ? new Date(a.publishedAtRaw).toISOString() : now.toISOString();
+
+    return `
   <url>
     <loc>${domain}/${a.category}/${a.slug ?? a.id}</loc>
     <news:news>
@@ -33,10 +38,11 @@ export async function GET(): Promise<Response> {
         <news:name>${SITE_CONFIG.name}</news:name>
         <news:language>en</news:language>
       </news:publication>
-      <news:publication_date>${a.publishedAtRaw ? new Date(a.publishedAtRaw).toISOString() : now.toISOString()}</news:publication_date>
-      <news:title><![CDATA[${a.title}]]></news:title>
+      <news:publication_date>${pubDateIso}</news:publication_date>
+      <news:title><![CDATA[${titleClean}]]></news:title>
     </news:news>
-  </url>`).join('');
+  </url>`;
+  }).join('');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset

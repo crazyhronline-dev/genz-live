@@ -5,6 +5,7 @@
 
 import type { Metadata } from 'next';
 import { SITE_CONFIG, NAV_CATEGORIES } from '@/config/site';
+import { stripHtml } from '@/lib/sanitizer';
 
 // ----------------------------------------------------------------
 // Constants
@@ -57,6 +58,8 @@ export function getCategoryHref(id: string): string {
 // Base metadata shared by all pages
 // ----------------------------------------------------------------
 function baseMetadata(): Metadata {
+  const googleVerify = process.env.NEXT_PUBLIC_GOOGLE_VERIFY;
+
   return {
     metadataBase: new URL(DOMAIN),
 
@@ -132,10 +135,8 @@ function baseMetadata(): Metadata {
       images: [OG_IMAGE_URL],
     },
 
-    // Verification tags
-    verification: {
-      google: process.env.NEXT_PUBLIC_GOOGLE_VERIFY ?? '',
-    },
+    // Verification tags (only output if environment variable exists & non-empty)
+    ...(googleVerify ? { verification: { google: googleVerify } } : {}),
 
     // Alternate / canonical (homepage default)
     alternates: {
@@ -189,14 +190,15 @@ export function buildPageMetadata(opts: PageMetadataOptions = {}): Metadata {
   } = opts;
 
   const fullTitle = title ?? undefined;
-  const canonical = canonicalPath ? `${DOMAIN}${canonicalPath}` : undefined;
+  const cleanDescription = stripHtml(description);
+  const canonical = canonicalPath !== undefined ? `${DOMAIN}${canonicalPath}` : undefined;
   const mergedKeywords = [...SITE_KEYWORDS, ...keywords];
 
   const og: Metadata['openGraph'] = {
     ...(base.openGraph as object),
     type: ogType,
     ...(title && { title: `${title} | ${SITE_NAME}` }),
-    description,
+    description: cleanDescription,
     images: [
       {
         url: ogImage,
@@ -222,7 +224,7 @@ export function buildPageMetadata(opts: PageMetadataOptions = {}): Metadata {
   const twitter: Metadata['twitter'] = {
     ...(base.twitter as object),
     ...(title && { title: `${title} | ${SITE_NAME}` }),
-    description,
+    description: cleanDescription,
     images: [ogImage],
   };
 
@@ -233,12 +235,12 @@ export function buildPageMetadata(opts: PageMetadataOptions = {}): Metadata {
   return {
     ...base,
     ...(fullTitle && { title: fullTitle }),
-    description,
+    description: cleanDescription,
     keywords: mergedKeywords,
     robots,
     openGraph: og,
     twitter,
-    ...(canonical && {
+    ...(canonical !== undefined && {
       alternates: {
         canonical,
         types: {
@@ -298,8 +300,9 @@ export function buildArticleMetadata(opts?: {
 }): Metadata {
   if (!opts || !opts.title) {
     return buildPageMetadata({
-      title: 'News Article',
-      description: DESCRIPTION,
+      title: 'Article Not Found',
+      description: 'The requested news article could not be found on GenZ Live.',
+      noIndex: true,
     });
   }
 
@@ -330,6 +333,8 @@ export function buildAuthorMetadata(opts: {
   avatar?: string;
   articleCount?: number;
 }): Metadata {
+  const shouldIndex = (opts.articleCount ?? 0) > 0;
+
   return buildPageMetadata({
     title: `${opts.name} — Editorial Author`,
     description: opts.bio
@@ -337,6 +342,7 @@ export function buildAuthorMetadata(opts: {
       : `Published articles, news reports, and analysis by ${opts.name} on ${SITE_NAME}. ${opts.articleCount ? `${opts.articleCount} published stories.` : ''}`,
     ogImage: opts.avatar ?? OG_IMAGE_URL,
     canonicalPath: `/authors/${opts.slug}`,
+    noIndex: !shouldIndex,
   });
 }
 

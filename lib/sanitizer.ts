@@ -28,3 +28,9 @@ export function sanitizeHtml(rawHtml: string): string {
 
   return sanitized;
 }
+
+/** Strip all HTML tags and normalize whitespace for plain text metadata & RSS */
+export function stripHtml(rawHtml: string): string {
+  if (!rawHtml) return '';
+  return rawHtml.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}

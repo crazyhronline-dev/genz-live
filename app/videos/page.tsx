@@ -8,6 +8,7 @@ import { SITE_CONFIG } from '@/config/site';
 export const metadata: Metadata = buildPageMetadata({
   title: 'Videos & Live Broadcasts',
   description: 'Watch live broadcasts, breaking news video coverage, and in-depth video reports on the GenZ Live YouTube channel.',
+  canonicalPath: '/videos',
 });
 
 export default function VideosPage() {

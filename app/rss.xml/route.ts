@@ -6,6 +6,7 @@
 
 import { SITE_CONFIG } from '@/config/site';
 import { getLatestArticles } from '@/lib/dataAccess';
+import { stripHtml } from '@/lib/sanitizer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -30,8 +31,9 @@ export async function GET(): Promise<Response> {
     const pubDate = a.publishedAtRaw
       ? new Date(a.publishedAtRaw).toUTCString()
       : now;
-    const description = escapeXml(a.excerpt ?? a.subtitle ?? '');
-    const title = escapeXml(a.title);
+    const cleanExcerpt = stripHtml(a.excerpt ?? a.subtitle ?? '');
+    const description = escapeXml(cleanExcerpt);
+    const title = escapeXml(stripHtml(a.title));
 
     return `
   <item>
@@ -40,8 +42,8 @@ export async function GET(): Promise<Response> {
     <guid isPermaLink="true">${url}</guid>
     <description>${description}</description>
     <pubDate>${pubDate}</pubDate>
-    <author>editorial@genz-live.com (${escapeXml(a.author)})</author>
-    <category>${escapeXml(a.categoryName)}</category>
+    <author>editorial@genz-live.com (${escapeXml(stripHtml(a.author))})</author>
+    <category>${escapeXml(stripHtml(a.categoryName))}</category>
     <source url="${domain}">${escapeXml(SITE_CONFIG.name)}</source>
   </item>`;
   }).join('');

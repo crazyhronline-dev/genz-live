@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Search as SearchIcon, X, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
@@ -10,9 +11,13 @@ import { ARTICLES } from '@/lib/newsData';
 import { NAV_CATEGORIES } from '@/config/site';
 import type { Article } from '@/types';
 
-export default function SearchPage() {
-  const [query, setQuery] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
+function SearchPageContent() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') || searchParams.get('search_term_string') || searchParams.get('query') || '';
+  const initialCategory = searchParams.get('category') || 'all';
+
+  const [query, setQuery] = useState(initialQuery);
+  const [filterCategory, setFilterCategory] = useState(initialCategory);
   const [selectedStory, setSelectedStory] = useState<Article | null>(null);
   const [savedIds, setSavedIds] = useState<string[]>([]);
 
@@ -146,5 +151,17 @@ export default function SearchPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-navy-main text-slate-100 flex items-center justify-center">
+        <div className="text-slate-400 text-sm animate-pulse">Loading search...</div>
+      </div>
+    }>
+      <SearchPageContent />
+    </Suspense>
   );
 }
