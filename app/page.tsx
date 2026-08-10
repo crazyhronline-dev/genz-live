@@ -1,3 +1,6 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import React from 'react';
 import nextDynamic from 'next/dynamic';
 import type { Metadata } from 'next';
@@ -25,10 +28,6 @@ const YouTubeLiveHub = nextDynamic(() => import('@/components/media/YouTubeLiveH
 const Newsletter = nextDynamic(() => import('@/components/ui/Newsletter'), {
   loading: () => <div className="h-32 animate-pulse bg-slate-900/50 rounded-2xl mx-4" />,
 });
-
-
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'GenZ Live — The Voice of GenZ',
