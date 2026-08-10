@@ -8,14 +8,9 @@
  */
 
 import { PrismaClient, UserRole } from '@prisma/client';
-import crypto from 'crypto';
+import { hashPassword } from '../lib/auth';
 
 const prisma = new PrismaClient();
-
-// Simple dev-only password hash (use bcrypt in production auth)
-function devHash(plain: string): string {
-  return crypto.createHash('sha256').update(plain).digest('hex');
-}
 
 // ----------------------------------------------------------------
 // CATEGORIES — Mirrors NAV_CATEGORIES in config/site.ts
@@ -125,7 +120,7 @@ async function main() {
     update: {},
     create: {
       email:    'admin@genz-live.com',
-      password: devHash('dev-admin-2026'),  // CHANGE before production
+      password: hashPassword('dev-admin-2026'),  // CHANGE before production
       name:     'GenZ Live Admin',
       role:     UserRole.SUPER_ADMIN,
       isActive: true,
@@ -142,7 +137,7 @@ async function main() {
     update: {},
     create: {
       email:    'editor@genz-live.com',
-      password: devHash('dev-editor-2026'), // CHANGE before production
+      password: hashPassword('dev-editor-2026'), // CHANGE before production
       name:     'GenZ Live Editor',
       role:     UserRole.EDITOR,
       isActive: true,
