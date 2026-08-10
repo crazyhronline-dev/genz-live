@@ -15,6 +15,15 @@ import {
   Sparkles
 } from 'lucide-react';
 
+interface ArticleModalProps {
+  article: any;
+  onClose: () => void;
+  isSaved: boolean;
+  onToggleBookmark: (id: string) => void;
+  onSelectRelated: (article: any) => void;
+  relatedArticles?: any[];
+}
+
 export default function ArticleModal({ 
   article, 
   onClose, 
@@ -22,7 +31,7 @@ export default function ArticleModal({
   onToggleBookmark, 
   onSelectRelated, 
   relatedArticles = [] 
-}) {
+}: ArticleModalProps) {
   const [likes, setLikes] = useState(article?.likes || 120);
   const [hasLiked, setHasLiked] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -51,7 +60,7 @@ export default function ArticleModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleAddComment = (e) => {
+  const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
