@@ -11,10 +11,10 @@ interface LogoProps {
 }
 
 const HEIGHT_CLASSES = {
-  sm: 'h-9 md:h-10',
-  md: 'h-11 md:h-12',
-  lg: 'h-12 md:h-14 lg:h-16',
-  xl: 'h-14 md:h-16 lg:h-18',
+  sm: 'h-11 md:h-12',
+  md: 'h-14 md:h-16',
+  lg: 'h-16 md:h-20 lg:h-24',
+  xl: 'h-20 md:h-24 lg:h-28',
 } as const;
 
 export default function Logo({ size = 'lg', className = '', priority = true }: LogoProps) {
@@ -27,7 +27,7 @@ export default function Logo({ size = 'lg', className = '', priority = true }: L
         alt={`${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
-        className={`${heightClass} w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_2px_12px_rgba(139,92,246,0.35)]`}
+        className={`${heightClass} w-auto object-contain logo-animated`}
         onError={(e) => { (e.target as HTMLImageElement).src = BRAND_ASSETS.logoLarge; }}
       />
     </Link>
