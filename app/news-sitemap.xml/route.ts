@@ -7,6 +7,7 @@
 import { SITE_CONFIG } from '@/config/site';
 import { getLatestArticles } from '@/lib/dataAccess';
 import { stripHtml } from '@/lib/sanitizer';
+import { getCategoryHref } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -29,10 +30,11 @@ export async function GET(): Promise<Response> {
   const items = recentArticles.map(a => {
     const titleClean = stripHtml(a.title).replace(/]]>/g, ']]&gt;');
     const pubDateIso = a.publishedAtRaw ? new Date(a.publishedAtRaw).toISOString() : now.toISOString();
+    const catPath = getCategoryHref(a.category);
 
     return `
   <url>
-    <loc>${domain}/${a.category}/${a.slug ?? a.id}</loc>
+    <loc>${domain}${catPath}/${a.slug ?? a.id}</loc>
     <news:news>
       <news:publication>
         <news:name>${SITE_CONFIG.name}</news:name>

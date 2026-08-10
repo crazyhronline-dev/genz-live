@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { SITE_CONFIG, NAV_CATEGORIES } from '@/config/site';
 import { getLatestArticles } from '@/lib/dataAccess';
+import { getCategoryHref } from '@/lib/seo';
 
 const domain = SITE_CONFIG.domain;
 const NOW = new Date().toISOString();
@@ -48,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articleRoutes: MetadataRoute.Sitemap = latestArticles
     .filter(a => !a.isDemo) // never index demo/placeholder articles
     .map(a => ({
-      url: `${domain}/${a.category}/${a.slug ?? a.id}`,
+      url: `${domain}${getCategoryHref(a.category)}/${a.slug ?? a.id}`,
       lastModified: a.updatedAtRaw ?? a.publishedAtRaw ?? NOW,
       changeFrequency: 'weekly' as const,
       priority: 0.8,
