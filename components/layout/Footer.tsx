@@ -1,12 +1,15 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Globe, ShieldCheck, Heart } from 'lucide-react';
 import { YoutubeIcon, InstagramIcon, FacebookIcon } from '@/components/ui/SocialIcons';
 import { NAV_CATEGORIES, SITE_CONFIG, BRAND_ASSETS } from '@/config/site';
 
 interface FooterProps {
-  setActiveCategory: (cat: string) => void;
+  /** When provided (home page), clicking a category updates page state.
+   *  When omitted (all other pages), clicking navigates to the route URL. */
+  setActiveCategory?: (cat: string) => void;
 }
 
 export default function Footer({ setActiveCategory }: FooterProps) {
@@ -49,15 +52,34 @@ export default function Footer({ setActiveCategory }: FooterProps) {
           <div className="md:col-span-4 space-y-3">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">News Categories</h3>
             <div className="grid grid-cols-2 gap-2">
-              {NAV_CATEGORIES.filter(c => c.id !== 'all').map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => { setActiveCategory(cat.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  className="text-left hover:text-purple-400 transition-colors text-slate-400 py-1"
-                >
-                  {cat.name}
-                </button>
-              ))}
+              {NAV_CATEGORIES.filter(c => c.id !== 'all').map((cat) => {
+                // Map category id to its URL slug
+                const href = cat.id === 'tech' ? '/technology' : `/${cat.id}`;
+
+                if (setActiveCategory) {
+                  // Home page: SPA state update
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => { setActiveCategory(cat.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                      className="text-left hover:text-purple-400 transition-colors text-slate-400 py-1"
+                    >
+                      {cat.name}
+                    </button>
+                  );
+                }
+
+                // All other pages: real link navigation
+                return (
+                  <Link
+                    key={cat.id}
+                    href={href}
+                    className="text-left hover:text-purple-400 transition-colors text-slate-400 py-1 block"
+                  >
+                    {cat.name}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -79,6 +101,21 @@ export default function Footer({ setActiveCategory }: FooterProps) {
                 <ShieldCheck className="w-4 h-4" /> Verified Independent Media
               </li>
             </ul>
+
+            {/* Legal links */}
+            <div className="pt-3 border-t border-white/5 space-y-1.5">
+              {[
+                ['About', '/about'],
+                ['Privacy Policy', '/privacy-policy'],
+                ['Terms', '/terms'],
+                ['Editorial Policy', '/editorial-policy'],
+                ['Contact', '/contact'],
+              ].map(([label, href]) => (
+                <Link key={href} href={href} className="block hover:text-purple-400 transition-colors">
+                  {label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
