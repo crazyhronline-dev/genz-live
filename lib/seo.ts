@@ -78,7 +78,8 @@ function baseMetadata(): Metadata {
     icons: {
       icon: [
         { url: '/favicon.ico', sizes: 'any' },
-        { url: '/brand/08_Website_Logo_300x100.png', type: 'image/png' },
+        { url: '/favicon.png', type: 'image/png', sizes: '800x800' },
+        { url: '/brand/01_YouTube_Profile_800x800.png', type: 'image/png' },
       ],
       apple: '/brand/01_YouTube_Profile_800x800.png',
       shortcut: '/favicon.ico',

@@ -20,7 +20,7 @@ export default function Footer({ setActiveCategory }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Brand Info */}
           <div className="md:col-span-5 space-y-4">
-            <Logo size="md" priority={false} />
+            <Logo size="lg" priority={false} />
             <p className="text-slate-300 font-semibold text-sm">{SITE_CONFIG.tagline}</p>
             <p className="text-slate-400 max-w-sm leading-relaxed">{SITE_CONFIG.description}</p>
             <div className="flex items-center gap-3 pt-2">
