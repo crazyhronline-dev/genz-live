@@ -4,7 +4,7 @@ import { User, ArrowLeft, BookOpen } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ArticleCard from '@/components/news/ArticleCard';
-import { buildPageMetadata } from '@/lib/seo';
+import { buildAuthorMetadata } from '@/lib/seo';
 import { getArticlesByAuthor } from '@/lib/dataAccess';
 
 interface Params {
@@ -14,9 +14,11 @@ interface Params {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const authorName = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-  return buildPageMetadata({
-    title: `${authorName} — Editorial Author`,
-    description: `Published articles, news reports, and analysis by ${authorName} on GenZ Live.`,
+  const articles = await getArticlesByAuthor(slug);
+  return buildAuthorMetadata({
+    name: authorName,
+    slug,
+    articleCount: articles.length,
   });
 }
 

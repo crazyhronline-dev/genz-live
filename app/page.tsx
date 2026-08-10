@@ -19,7 +19,11 @@ import {
   getTrendingArticles,
 } from '@/lib/dataAccess';
 
-export const metadata: Metadata = buildPageMetadata();
+export const metadata: Metadata = buildPageMetadata({
+  title: 'GenZ Live — The Voice of GenZ',
+  description: 'GenZ Live is a global digital news platform covering World, India, Technology, AI, Business, Markets, Entertainment, Sports and Culture news. Stay informed with the stories that matter to your generation.',
+  canonicalPath: '',
+});
 
 export default async function HomePage() {
   // Server-side data access engine

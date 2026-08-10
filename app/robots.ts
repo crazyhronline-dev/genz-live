@@ -1,6 +1,6 @@
 // app/robots.ts
 // Next.js App Router — generates /robots.txt automatically at build time
-// Docs: https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots
+// Phase 5: Updated to reference news sitemap and RSS feed
 
 import type { MetadataRoute } from 'next';
 import { SITE_CONFIG } from '@/config/site';
@@ -10,36 +10,40 @@ export default function robots(): MetadataRoute.Robots {
 
   return {
     rules: [
-      // Allow all well-behaved crawlers
+      // Allow all well-behaved search crawlers
       {
         userAgent: '*',
         allow: '/',
         disallow: [
-          '/admin/',          // Admin dashboard (Phase 2)
-          '/api/',            // API routes not meant for crawlers
-          '/_next/',          // Next.js internals
-          '/dashboard/',      // Future publisher dashboard
-          '/preview/',        // Draft article previews
-          '*.json',           // JSON data files
+          '/admin',
+          '/admin/',
+          '/api/',
+          '/_next/',
+          '/preview/',
         ],
       },
-      // Block AI training scrapers
+      // Block known AI training scrapers
       {
-        userAgent: ['GPTBot', 'ChatGPT-User', 'CCBot', 'anthropic-ai', 'Claude-Web'],
+        userAgent: ['GPTBot', 'ChatGPT-User', 'CCBot', 'anthropic-ai', 'Claude-Web', 'PerplexityBot'],
         disallow: '/',
       },
       // Allow Google Image Bot full access
       {
         userAgent: 'Googlebot-Image',
         allow: '/',
+        disallow: ['/admin', '/api/', '/_next/'],
       },
       // Allow Google News Bot full access
       {
         userAgent: 'Googlebot-News',
         allow: '/',
+        disallow: ['/admin', '/api/', '/_next/'],
       },
     ],
-    sitemap: `${domain}/sitemap.xml`,
+    sitemap: [
+      `${domain}/sitemap.xml`,
+      `${domain}/news-sitemap.xml`,
+    ],
     host: domain,
   };
 }

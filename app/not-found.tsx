@@ -1,8 +1,18 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 import { Compass, Home, Search, Flame, ArrowLeft } from 'lucide-react';
 import { SITE_CONFIG } from '@/config/site';
+
+export const metadata: Metadata = {
+  title: '404 — Page Not Found | GenZ Live',
+  description: 'The page you are looking for does not exist on GenZ Live.',
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export default function NotFound() {
   return (

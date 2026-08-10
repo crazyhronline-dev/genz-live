@@ -4,7 +4,7 @@ import { Hash, ArrowLeft } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ArticleCard from '@/components/news/ArticleCard';
-import { buildPageMetadata } from '@/lib/seo';
+import { buildTagMetadata } from '@/lib/seo';
 import { getArticlesByTag } from '@/lib/dataAccess';
 
 interface Params {
@@ -14,9 +14,11 @@ interface Params {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const tagName = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-  return buildPageMetadata({
-    title: `#${tagName} — Topic Tag`,
-    description: `All published GenZ Live news articles, analysis, and stories tagged with #${tagName}.`,
+  const articles = await getArticlesByTag(slug);
+  return buildTagMetadata({
+    name: tagName,
+    slug,
+    articleCount: articles.length,
   });
 }
 

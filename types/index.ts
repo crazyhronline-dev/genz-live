@@ -22,7 +22,9 @@ export interface Article {
   author: string;
   authorRole?: string;
   authorAvatar?: string;
-  publishedAt: string;
+  publishedAt: string;        // Human-readable date string for display
+  publishedAtRaw?: string;    // ISO 8601 date string for feeds & structured data
+  updatedAtRaw?: string;      // ISO 8601 modified date for structured data
   readTime: string;
   views: string;
   likes: number;

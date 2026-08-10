@@ -17,12 +17,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
-      url: `${domain}/search`,
-      lastModified: NOW,
-      changeFrequency: 'always',
-      priority: 0.8,
-    },
-    {
       url: `${domain}/videos`,
       lastModified: NOW,
       changeFrequency: 'daily',
@@ -49,14 +43,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${domain}/disclaimer`,         priority: 0.4, changeFrequency: 'monthly' as const },
   ].map(r => ({ ...r, lastModified: NOW }));
 
-  // Query published articles for sitemap
-  const latestArticles = await getLatestArticles(50);
-  const articleRoutes: MetadataRoute.Sitemap = latestArticles.map(a => ({
-    url: `${domain}/${a.category}/${a.slug ?? a.id}`,
-    lastModified: NOW,
-    changeFrequency: 'weekly' as const,
-    priority: 0.8,
-  }));
+  // Published articles only — strict security filter applied inside getLatestArticles
+  const latestArticles = await getLatestArticles(200);
+  const articleRoutes: MetadataRoute.Sitemap = latestArticles
+    .filter(a => !a.isDemo) // never index demo/placeholder articles
+    .map(a => ({
+      url: `${domain}/${a.category}/${a.slug ?? a.id}`,
+      lastModified: a.updatedAtRaw ?? a.publishedAtRaw ?? NOW,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }));
 
   return [
     ...staticRoutes,

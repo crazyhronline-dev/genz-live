@@ -1,5 +1,5 @@
 // ================================================================
-// GenZ Live — SEO Metadata Library
+// GenZ Live — SEO Metadata Library (Phase 5: Advanced SEO)
 // Single source of truth for all page metadata, OG, Twitter/X cards
 // ================================================================
 
@@ -61,7 +61,7 @@ function baseMetadata(): Metadata {
     metadataBase: new URL(DOMAIN),
 
     title: {
-      default: `${SITE_NAME} | ${TAGLINE} — Global Digital News & Media`,
+      default: `${SITE_NAME} — ${TAGLINE}`,
       template: `%s | ${SITE_NAME}`,
     },
 
@@ -102,7 +102,7 @@ function baseMetadata(): Metadata {
       siteName: SITE_NAME,
       locale: 'en_US',
       url: DOMAIN,
-      title: `${SITE_NAME} | ${TAGLINE}`,
+      title: `${SITE_NAME} — ${TAGLINE}`,
       description: DESCRIPTION,
       images: [
         {
@@ -127,7 +127,7 @@ function baseMetadata(): Metadata {
       card: 'summary_large_image',
       site: '@genzliveofficial',
       creator: '@genzliveofficial',
-      title: `${SITE_NAME} | ${TAGLINE}`,
+      title: `${SITE_NAME} — ${TAGLINE}`,
       description: DESCRIPTION,
       images: [OG_IMAGE_URL],
     },
@@ -137,9 +137,12 @@ function baseMetadata(): Metadata {
       google: process.env.NEXT_PUBLIC_GOOGLE_VERIFY ?? '',
     },
 
-    // Alternate / canonical
+    // Alternate / canonical (homepage default)
     alternates: {
       canonical: DOMAIN,
+      types: {
+        'application/rss+xml': `${DOMAIN}/rss.xml`,
+      },
     },
 
     // App metadata
@@ -200,7 +203,7 @@ export function buildPageMetadata(opts: PageMetadataOptions = {}): Metadata {
         width: 1200,
         height: 630,
         alt: title ?? SITE_NAME,
-        type: 'image/png',
+        type: ogImage.endsWith('.png') ? 'image/png' : 'image/jpeg',
       },
     ],
     ...(canonical && { url: canonical }),
@@ -224,7 +227,7 @@ export function buildPageMetadata(opts: PageMetadataOptions = {}): Metadata {
   };
 
   const robots: Metadata['robots'] = noIndex
-    ? { index: false, follow: false }
+    ? { index: false, follow: true } // noindex but allow following links
     : base.robots;
 
   return {
@@ -235,22 +238,45 @@ export function buildPageMetadata(opts: PageMetadataOptions = {}): Metadata {
     robots,
     openGraph: og,
     twitter,
-    ...(canonical && { alternates: { canonical } }),
+    ...(canonical && {
+      alternates: {
+        canonical,
+        types: {
+          'application/rss+xml': `${DOMAIN}/rss.xml`,
+        },
+      },
+    }),
   };
 }
 
 // ----------------------------------------------------------------
-// buildCategoryMetadata — for category pages
+// buildCategoryMetadata — unique SEO metadata per category
 // ----------------------------------------------------------------
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  world:         'Global news coverage from every continent — wars, diplomacy, climate, politics, and international affairs reported live for GenZ.',
+  india:         'Breaking India news — politics, society, economy, regional stories, and culture across every state, reported in real time.',
+  technology:    'Tech news, gadget launches, startup funding, cybersecurity, open source, and digital innovation covered daily for digital natives.',
+  tech:          'Tech news, gadget launches, startup funding, cybersecurity, open source, and digital innovation covered daily for digital natives.',
+  ai:            'Artificial intelligence breakthroughs, LLMs, generative AI, robotics, and machine learning news — the future, reported today.',
+  business:      'Business news, corporate strategy, startups, entrepreneurship, mergers, and economic policy coverage for the next generation.',
+  markets:       'Stock market, crypto, commodities, indices, and financial market analysis explained clearly for younger investors.',
+  entertainment: 'Movies, OTT, music, celebrity culture, gaming, memes, and pop culture stories that define GenZ entertainment.',
+  sports:        'Cricket, football, Olympics, eSports, and every sport that GenZ cares about — live scores, analysis, and athlete stories.',
+  culture:       'GenZ culture — fashion, art, identity, social media trends, lifestyle, and the ideas shaping a generation.',
+  trending:      'What GenZ is talking about right now — viral stories, social media trends, and the most-shared news of the day.',
+};
+
 export function buildCategoryMetadata(categoryId: string): Metadata {
   const cat = NAV_CATEGORIES.find(c => c.id === categoryId);
   const name = cat?.name.replace(/^[\p{Emoji}\s]+/u, '').trim() ?? categoryId;
   const href = getCategoryHref(categoryId);
+  const desc = CATEGORY_DESCRIPTIONS[categoryId]
+    ?? `Latest ${name} news, breaking stories and live updates — ${SITE_NAME}. Stay informed with real-time ${name} coverage.`;
 
   return buildPageMetadata({
-    title: `${name} News`,
-    description: `Latest ${name} news, breaking stories and live updates — ${SITE_NAME}. Stay informed with real-time ${name} coverage.`,
-    keywords: [name, `${name} news`, `${name} updates`, 'Breaking news'],
+    title: `${name} News — Latest Headlines & Breaking Stories`,
+    description: desc,
+    keywords: [name, `${name} news`, `${name} updates`, 'Breaking news', `Latest ${name}`],
     canonicalPath: href,
     ogType: 'website',
   });
@@ -263,7 +289,9 @@ export function buildArticleMetadata(opts?: {
   title?: string;
   description?: string;
   category?: string;
+  catSlug?: string;
   publishedTime?: string;
+  modifiedTime?: string;
   author?: string;
   image?: string;
   slug?: string;
@@ -275,16 +303,58 @@ export function buildArticleMetadata(opts?: {
     });
   }
 
+  const catSlug = opts.catSlug ?? opts.category?.toLowerCase().replace(/\s+/g, '-') ?? 'news';
+
   return buildPageMetadata({
     title: opts.title,
     description: opts.description ?? DESCRIPTION,
     ogImage: opts.image ?? OG_IMAGE_URL,
     ogType: 'article',
-    canonicalPath: opts.slug ? `/${opts.category ?? 'news'}/${opts.slug}` : undefined,
+    canonicalPath: opts.slug ? `/${catSlug}/${opts.slug}` : undefined,
     article: {
       publishedTime: opts.publishedTime,
+      modifiedTime: opts.modifiedTime,
       authors: opts.author ? [opts.author] : [SITE_NAME],
       section: opts.category,
     },
+  });
+}
+
+// ----------------------------------------------------------------
+// buildAuthorMetadata — for author profile pages
+// ----------------------------------------------------------------
+export function buildAuthorMetadata(opts: {
+  name: string;
+  slug: string;
+  bio?: string;
+  avatar?: string;
+  articleCount?: number;
+}): Metadata {
+  return buildPageMetadata({
+    title: `${opts.name} — Editorial Author`,
+    description: opts.bio
+      ? `${opts.bio.slice(0, 150)}...`
+      : `Published articles, news reports, and analysis by ${opts.name} on ${SITE_NAME}. ${opts.articleCount ? `${opts.articleCount} published stories.` : ''}`,
+    ogImage: opts.avatar ?? OG_IMAGE_URL,
+    canonicalPath: `/authors/${opts.slug}`,
+  });
+}
+
+// ----------------------------------------------------------------
+// buildTagMetadata — for topic tag pages (with noindex control)
+// ----------------------------------------------------------------
+export function buildTagMetadata(opts: {
+  name: string;
+  slug: string;
+  articleCount: number;
+}): Metadata {
+  // Noindex tags with fewer than 3 articles to avoid thin-content indexation
+  const shouldIndex = opts.articleCount >= 3;
+
+  return buildPageMetadata({
+    title: `#${opts.name} — Topic Tag`,
+    description: `${opts.articleCount} published ${SITE_NAME} news articles, analysis and stories tagged with #${opts.name}.`,
+    canonicalPath: `/tags/${opts.slug}`,
+    noIndex: !shouldIndex,
   });
 }

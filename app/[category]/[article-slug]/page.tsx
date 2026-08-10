@@ -23,9 +23,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: article.seoTitle ?? article.title,
     description: article.seoDescription ?? article.subtitle ?? article.excerpt,
     category: article.categoryName,
-    publishedTime: article.publishedAt,
+    publishedTime: article.publishedAtRaw ?? article.publishedAt,
+    modifiedTime: article.updatedAtRaw,
     author: article.author,
     image: article.image,
+    slug: article.slug ?? articleSlug,
+    catSlug: category,
   });
 }
 
@@ -45,6 +48,7 @@ export default async function ArticleSlugPage({ params }: Params) {
   const relatedArticles = await getRelatedArticles(article.id, category, 3);
   const catMeta = NAV_CATEGORIES.find(c => c.id === category);
   const canonicalUrl = `${SITE_CONFIG.domain}/${category}/${article.slug ?? articleSlug}`;
+  const authorSlug = article.author.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   // JSON-LD NewsArticle Structured Data
   const newsArticleJsonLd = {
@@ -55,21 +59,39 @@ export default async function ArticleSlugPage({ params }: Params) {
       '@id': canonicalUrl,
     },
     headline: article.title,
-    description: article.subtitle ?? article.excerpt,
-    image: [article.image],
-    datePublished: article.publishedAt,
+    description: article.subtitle ?? article.excerpt ?? '',
+    image: {
+      '@type': 'ImageObject',
+      url: article.image,
+      width: 1200,
+      height: 630,
+    },
+    datePublished: article.publishedAtRaw ?? article.publishedAt,
+    dateModified: article.updatedAtRaw ?? article.publishedAtRaw ?? article.publishedAt,
+    articleSection: article.categoryName,
     author: {
       '@type': 'Person',
       name: article.author,
+      url: `${SITE_CONFIG.domain}/authors/${authorSlug}`,
       jobTitle: article.authorRole,
     },
     publisher: {
-      '@type': 'Organization',
+      '@type': 'NewsMediaOrganization',
+      '@id': `${SITE_CONFIG.domain}/#organization`,
       name: SITE_CONFIG.name,
+      url: SITE_CONFIG.domain,
       logo: {
         '@type': 'ImageObject',
         url: `${SITE_CONFIG.domain}/brand/06_Website_Logo_1200x400.png`,
+        width: 1200,
+        height: 400,
       },
+    },
+    isPartOf: {
+      '@type': 'WebSite',
+      '@id': `${SITE_CONFIG.domain}/#website`,
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.domain,
     },
   };
 
@@ -83,8 +105,6 @@ export default async function ArticleSlugPage({ params }: Params) {
       { '@type': 'ListItem', position: 3, name: article.title, item: canonicalUrl },
     ],
   };
-
-  const authorSlug = article.author.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   return (
     <div className="min-h-screen bg-navy-main text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
