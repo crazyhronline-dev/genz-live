@@ -202,8 +202,11 @@ model Article {
   source   Source? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
 
   // Relations
-  tags  ArticleTag[]
-  media Media[]
+  tags            ArticleTag[]
+  media           Media[]
+  ingestedStories IngestedStory[]
+  aiJobs          AIJob[]
+  aiDraftMetadata AIDraftMetadata?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -421,3 +424,158 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_logs")
 }
+
+// ================================================================
+// NEWS_SOURCE — Managed RSS feeds and news API endpoints
+// ================================================================
+
+model NewsSource {
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  description     String?   @db.Text
+  websiteUrl      String
+  feedUrl         String    @unique
+  sourceType      String    @default("RSS") /// RSS | API | MANUAL
+  category        String?   /// Default category suggestion
+  language        String    @default("en")
+  country         String    @default("US")
+  trustLevel      String    @default("MEDIUM") /// HIGH | MEDIUM | LOW
+  isActive        Boolean   @default(true)
+  lastFetchedAt   DateTime?
+  lastFetchStatus String?   /// SUCCESS | FAILED
+  lastFetchError  String?   @db.Text
+
+  // Relations
+  ingestedStories IngestedStory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([sourceType])
+  @@index([isActive])
+  @@index([trustLevel])
+  @@index([createdAt])
+  @@map("news_sources")
+}
+
+// ================================================================
+// INGESTED_STORY — Incoming stories fetched from news sources
+// ================================================================
+
+model IngestedStory {
+  id                 String    @id @default(cuid())
+  sourceId           String
+  source             NewsSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  sourceUrl          String    @db.Text
+  urlHash            String    @unique /// SHA-256 hash of normalized sourceUrl for fast dedup
+  sourceTitle        String
+  titleHash          String    /// SHA-256 of normalized title
+  sourceDescription  String?   @db.Text
+  sourceAuthor       String?
+  sourcePublishedAt  DateTime?
+  status             String    @default("NEW") /// NEW | PROCESSING | ANALYZED | DRAFT_CREATED | REVIEW | IGNORED | DUPLICATE | FAILED
+  duplicateOfId      String?   /// Optional pointer to duplicate story
+  categorySuggestion String?
+
+  // Optional created article link
+  articleId String?
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+
+  // Relations
+  aiAnalysis AIAnalysis?
+  aiJobs     AIJob[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sourceId])
+  @@index([status])
+  @@index([titleHash])
+  @@index([articleId])
+  @@index([createdAt])
+  @@map("ingested_stories")
+}
+
+// ================================================================
+// AI_JOB — Controlled background/async AI task tracking
+// ================================================================
+
+model AIJob {
+  id              String    @id @default(cuid())
+  jobType         String    /// ANALYZE_STORY | GENERATE_DRAFT | GENERATE_HEADLINES | GENERATE_SEO | SUGGEST_CATEGORY | SUGGEST_TAGS
+  status          String    @default("QUEUED") /// QUEUED | PROCESSING | COMPLETED | FAILED
+  ingestedStoryId String?
+  ingestedStory   IngestedStory? @relation(fields: [ingestedStoryId], references: [id], onDelete: SetNull)
+  articleId       String?
+  article         Article?  @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  attempts        Int       @default(0)
+  provider        String    @default("mock")
+  model           String    @default("gpt-4o-mini")
+  startedAt       DateTime?
+  completedAt     DateTime?
+  errorMessage    String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([jobType])
+  @@index([status])
+  @@index([ingestedStoryId])
+  @@index([articleId])
+  @@index([createdAt])
+  @@map("ai_jobs")
+}
+
+// ================================================================
+// AI_ANALYSIS — Structured AI analysis results for ingested stories
+// ================================================================
+
+model AIAnalysis {
+  id                 String        @id @default(cuid())
+  ingestedStoryId    String        @unique
+  ingestedStory      IngestedStory @relation(fields: [ingestedStoryId], references: [id], onDelete: Cascade)
+  summary            String        @db.Text
+  keyFacts           Json          /// Array of fact strings
+  entities           Json          /// { people: [], organizations: [], locations: [], dates: [], numbers: [] }
+  claims             Json          /// Array of { claim, sourceSupport, confidence }
+  suggestedHeadline  String
+  suggestedHeadlines Json          /// Array of headline strings
+  suggestedCategory  String
+  suggestedTags      Json          /// Array of tag strings
+  riskFlags          Json          /// Array of warning strings
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ingestedStoryId])
+  @@index([createdAt])
+  @@map("ai_analyses")
+}
+
+// ================================================================
+// AI_DRAFT_METADATA — Provenance and audit tracking for AI drafts
+// ================================================================
+
+model AIDraftMetadata {
+  id               String   @id @default(cuid())
+  articleId        String   @unique
+  article          Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  ingestedStoryId  String?
+  provider         String
+  model            String
+  promptVersion    String   @default("1.0")
+  generatedAt      DateTime @default(now())
+  isAiGenerated    Boolean  @default(true)
+  approvedByUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([articleId])
+  @@index([ingestedStoryId])
+  @@index([createdAt])
+  @@map("ai_draft_metadata")
+}
+

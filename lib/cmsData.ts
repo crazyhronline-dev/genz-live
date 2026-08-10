@@ -139,6 +139,8 @@ export async function getCmsArticles(filter: CmsArticleFilter = {}) {
           id: a.id,
           slug: a.slug,
           title: a.title,
+          subtitle: a.subtitle ?? undefined,
+          excerpt: a.excerpt ?? undefined,
           status: a.status,
           categoryName: a.category.name,
           categorySlug: a.category.slug,
@@ -163,10 +165,10 @@ export async function getCmsArticles(filter: CmsArticleFilter = {}) {
 
   // Fallback demo state
   const mockArticles = [
-    { id: 'art-1', slug: 'ai-autonomous-agents', title: '[DEMO] OpenAI & Anthropic Announce Autonomous AI Agents', status: 'PUBLISHED' as ArticleStatus, categoryName: 'Artificial Intelligence', categorySlug: 'ai', authorName: 'Dr. Sarah Chen', authorId: 'auth-1', views: 14200, isFeatured: true, isTrending: true, isBreaking: false, publishedAt: 'Aug 10, 2026', scheduledAt: null, updatedAt: 'Aug 10' },
-    { id: 'art-2', slug: 'quantum-computing-breakthrough', title: '[DEMO] Quantum Computing Reaches Room-Temperature Milestone', status: 'DRAFT' as ArticleStatus, categoryName: 'Technology', categorySlug: 'technology', authorName: 'Alex Rivera', authorId: 'auth-2', views: 0, isFeatured: false, isTrending: false, isBreaking: false, publishedAt: 'Not Published', scheduledAt: null, updatedAt: 'Aug 09' },
-    { id: 'art-3', slug: 'india-digital-rupee', title: '[DEMO] India Digital Rupee Crosses 100 Million Active Users', status: 'REVIEW' as ArticleStatus, categoryName: 'India', categorySlug: 'india', authorName: 'Priya Sharma', authorId: 'auth-3', views: 0, isFeatured: false, isTrending: false, isBreaking: false, publishedAt: 'Not Published', scheduledAt: null, updatedAt: 'Aug 08' },
-    { id: 'art-4', slug: 'global-markets-rally', title: '[DEMO] Global Tech Stocks Rally Following AI Infrastructure Grants', status: 'SCHEDULED' as ArticleStatus, categoryName: 'Markets', categorySlug: 'markets', authorName: 'Marcus Vance', authorId: 'auth-4', views: 0, isFeatured: false, isTrending: false, isBreaking: true, publishedAt: 'Not Published', scheduledAt: 'Aug 12, 2026, 10:00 AM', updatedAt: 'Aug 07' },
+    { id: 'art-1', slug: 'ai-autonomous-agents', title: '[DEMO] OpenAI & Anthropic Announce Autonomous AI Agents', subtitle: 'New multi-agent frameworks released.', excerpt: 'Major AI laboratories have simultaneously released developer frameworks for autonomous agents.', status: 'PUBLISHED' as ArticleStatus, categoryName: 'Artificial Intelligence', categorySlug: 'ai', authorName: 'Dr. Sarah Chen', authorId: 'auth-1', views: 14200, isFeatured: true, isTrending: true, isBreaking: false, publishedAt: 'Aug 10, 2026', scheduledAt: null, updatedAt: 'Aug 10' },
+    { id: 'art-2', slug: 'quantum-computing-breakthrough', title: '[DEMO] Quantum Computing Reaches Room-Temperature Milestone', subtitle: 'Silicon-based qubits operate at room temp.', excerpt: 'Researchers demonstrate room-temperature quantum computing using silicon-spin qubits.', status: 'DRAFT' as ArticleStatus, categoryName: 'Technology', categorySlug: 'technology', authorName: 'Alex Rivera', authorId: 'auth-2', views: 0, isFeatured: false, isTrending: false, isBreaking: false, publishedAt: 'Not Published', scheduledAt: null, updatedAt: 'Aug 09' },
+    { id: 'art-3', slug: 'india-digital-rupee', title: '[DEMO] India Digital Rupee Crosses 100 Million Active Users', subtitle: 'CBDC adoption accelerates nationwide.', excerpt: 'RBI reports unprecedented growth in digital rupee transactions across retail networks.', status: 'REVIEW' as ArticleStatus, categoryName: 'India', categorySlug: 'india', authorName: 'Priya Sharma', authorId: 'auth-3', views: 0, isFeatured: false, isTrending: false, isBreaking: false, publishedAt: 'Not Published', scheduledAt: null, updatedAt: 'Aug 08' },
+    { id: 'art-4', slug: 'global-markets-rally', title: '[DEMO] Global Tech Stocks Rally Following AI Infrastructure Grants', subtitle: 'Equities surge on government tech funding.', excerpt: 'Global indices posted gains following announcements of semiconductor funding.', status: 'SCHEDULED' as ArticleStatus, categoryName: 'Markets', categorySlug: 'markets', authorName: 'Marcus Vance', authorId: 'auth-4', views: 0, isFeatured: false, isTrending: false, isBreaking: true, publishedAt: 'Not Published', scheduledAt: 'Aug 12, 2026, 10:00 AM', updatedAt: 'Aug 07' },
   ];
 
   const filtered = mockArticles.filter(a => {
