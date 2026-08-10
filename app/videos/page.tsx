@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import YouTubeLiveHub from '@/components/media/YouTubeLiveHub';
-import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import Logo from '@/components/ui/Logo';
 import { buildPageMetadata } from '@/lib/seo';
 import { SITE_CONFIG } from '@/config/site';
 
@@ -16,9 +16,7 @@ export default function VideosPage() {
       {/* Thin header — Videos page has its own channel section */}
       <header className="bg-slate-950/80 backdrop-blur-xl border-b border-white/10 py-4 px-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <a href="/">
-            <img src="/brand/06_Website_Logo_1200x400.png" alt="GenZ Live" className="h-9 w-auto object-contain" />
-          </a>
+          <Logo size="md" />
           <div className="flex items-center gap-3">
             <span className="badge-live">🔴 LIVE NOW</span>
             <a href={SITE_CONFIG.youtube.url} target="_blank" rel="noreferrer" className="btn-primary text-xs py-2 px-4">

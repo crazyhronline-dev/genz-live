@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
-import { Compass, Home, Search, Flame, Radio, ArrowLeft } from 'lucide-react';
+import { Compass, Home, Search, Flame, ArrowLeft } from 'lucide-react';
 import { SITE_CONFIG } from '@/config/site';
 
 export default function NotFound() {

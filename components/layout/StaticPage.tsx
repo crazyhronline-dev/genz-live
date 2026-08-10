@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import Logo from '@/components/ui/Logo';
 import { SITE_CONFIG } from '@/config/site';
 
 interface StaticPageProps {
@@ -18,13 +17,7 @@ export default function StaticPage({ title, subtitle, lastUpdated, children }: S
       {/* Minimal header for static pages */}
       <header className="bg-slate-950/80 backdrop-blur-xl border-b border-white/10 py-4 px-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <Link href="/">
-            <img
-              src="/brand/06_Website_Logo_1200x400.png"
-              alt="GenZ Live Logo"
-              className="h-9 w-auto object-contain"
-            />
-          </Link>
+          <Logo size="md" />
           <Link href="/" className="text-xs text-slate-400 hover:text-white transition-colors">
             ← Back to Home
           </Link>

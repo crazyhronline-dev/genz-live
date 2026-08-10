@@ -94,7 +94,7 @@ export default function SearchPage() {
             <div className="space-y-4">
               <p className="text-sm text-slate-400">
                 {results.length === 0 ? 'No results found' : `${results.length} result${results.length !== 1 ? 's' : ''} found`}
-                {query && <span> for <strong className="text-white">"{query}"</strong></span>}
+                {query && <span> for <strong className="text-white">&quot;{query}&quot;</strong></span>}
               </p>
 
               {results.length > 0 ? (

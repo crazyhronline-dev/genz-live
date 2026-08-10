@@ -4,7 +4,7 @@
 // ================================================================
 
 import type { Metadata } from 'next';
-import { SITE_CONFIG, BRAND_ASSETS, NAV_CATEGORIES } from '@/config/site';
+import { SITE_CONFIG, NAV_CATEGORIES } from '@/config/site';
 
 // ----------------------------------------------------------------
 // Constants

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { BRAND_ASSETS, SITE_CONFIG } from '@/config/site';
 
 interface LogoProps {
@@ -19,7 +20,7 @@ export default function Logo({ size = 'md', className = '', priority = true }: L
   const { height, width, src } = SIZES[size];
 
   return (
-    <a href="/" className={`group flex items-center shrink-0 ${className}`} aria-label={SITE_CONFIG.name}>
+    <Link href="/" className={`group flex items-center shrink-0 ${className}`} aria-label={SITE_CONFIG.name}>
       <img
         src={src}
         alt={`${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`}
@@ -31,6 +32,6 @@ export default function Logo({ size = 'md', className = '', priority = true }: L
         className="w-auto object-contain transition-transform duration-300 group-hover:scale-105"
         onError={(e) => { (e.target as HTMLImageElement).src = BRAND_ASSETS.logoMedium; }}
       />
-    </a>
+    </Link>
   );
 }

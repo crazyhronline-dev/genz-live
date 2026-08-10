@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Eye, BookOpen } from 'lucide-react';
+import Logo from '@/components/ui/Logo';
 import { ARTICLES } from '@/lib/newsData';
 import { NAV_CATEGORIES, SITE_CONFIG } from '@/config/site';
 import { buildPageMetadata } from '@/lib/seo';
@@ -32,9 +33,7 @@ export default async function ArticleSlugPage({ params }: Params) {
     <div className="min-h-screen bg-navy-main text-slate-100 flex flex-col">
       <header className="bg-slate-950/80 backdrop-blur-xl border-b border-white/10 py-4 px-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <a href="/">
-            <img src="/brand/06_Website_Logo_1200x400.png" alt="GenZ Live" className="h-9 w-auto object-contain" />
-          </a>
+          <Logo size="md" />
           <div className="flex items-center gap-3 text-sm">
             <Link href="/" className="text-slate-400 hover:text-white transition-colors">Home</Link>
             <span className="text-slate-700">/</span>
@@ -64,7 +63,15 @@ export default async function ArticleSlugPage({ params }: Params) {
                 </div>
               </div>
 
-              <img src={article.image} alt={article.title} className="w-full aspect-video object-cover rounded-2xl border border-white/10" />
+              <img
+                src={article.image}
+                alt={article.title}
+                loading="eager"
+                decoding="async"
+                width="768"
+                height="432"
+                className="w-full aspect-video object-cover rounded-2xl border border-white/10"
+              />
 
               <div
                 className="prose-genz"

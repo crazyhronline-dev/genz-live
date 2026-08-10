@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import StaticPage from '@/components/layout/StaticPage';
 import { buildPageMetadata } from '@/lib/seo';
 
@@ -40,7 +41,7 @@ export default function EditorialPolicyPage() {
       <p>We are committed to representing diverse voices, perspectives, and communities in our coverage. Our team reflects the global audience we serve.</p>
 
       <h2>7. Corrections</h2>
-      <p>Errors are corrected promptly and transparently. See our <a href="/corrections-policy">Corrections Policy</a> for full details.</p>
+      <p>Errors are corrected promptly and transparently. See our <Link href="/corrections-policy">Corrections Policy</Link> for full details.</p>
 
       <h2>8. Editorial Complaints</h2>
       <p>Concerns about our editorial coverage may be submitted to <a href="mailto:editorial@genz-live.com">editorial@genz-live.com</a>. All complaints are reviewed by a senior editor within 5 working days.</p>

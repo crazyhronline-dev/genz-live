@@ -23,7 +23,7 @@ export default function AboutPage() {
 
       <h2>Our Mission</h2>
       <p>
-        To build the world's most trusted news platform for people under 35 — delivering raw, fact-checked, and engaging stories that matter to the next generation. We believe that complex global events can be reported accurately without being boring, and that world-class journalism should be accessible to everyone.
+        To build the world&apos;s most trusted news platform for people under 35 — delivering raw, fact-checked, and engaging stories that matter to the next generation. We believe that complex global events can be reported accurately without being boring, and that world-class journalism should be accessible to everyone.
       </p>
 
       <h2>What We Cover</h2>

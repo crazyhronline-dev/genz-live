@@ -10,7 +10,7 @@ export const metadata: Metadata = buildPageMetadata({
 export default function PrivacyPolicyPage() {
   return (
     <StaticPage title="Privacy Policy" subtitle="How we collect, use, and protect your information" lastUpdated="August 2026">
-      <p>Your privacy is important to us. This Privacy Policy explains how <strong>GenZ Live</strong> ("we", "our", "us") collects, uses, and protects your personal information when you visit <strong>genz-live.com</strong> or interact with our services.</p>
+      <p>Your privacy is important to us. This Privacy Policy explains how <strong>GenZ Live</strong> (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) collects, uses, and protects your personal information when you visit <strong>genz-live.com</strong> or interact with our services.</p>
 
       <h2>1. Information We Collect</h2>
       <ul>
@@ -43,7 +43,7 @@ export default function PrivacyPolicyPage() {
       <ul>
         <li>Access the personal data we hold about you</li>
         <li>Request correction of inaccurate data</li>
-        <li>Request deletion of your data ("right to be forgotten")</li>
+        <li>Request deletion of your data (&quot;right to be forgotten&quot;)</li>
         <li>Withdraw consent at any time where processing is based on consent</li>
       </ul>
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { UserCircle2, ArrowLeft, Clock, Eye } from 'lucide-react';
+import { UserCircle2, Clock, Eye } from 'lucide-react';
 import StaticPage from '@/components/layout/StaticPage';
 import { ARTICLES } from '@/lib/newsData';
 import { buildPageMetadata } from '@/lib/seo';

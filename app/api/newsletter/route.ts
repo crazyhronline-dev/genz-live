@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       success: true,
       message: 'Successfully subscribed to GenZ Live newsletter!',
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
