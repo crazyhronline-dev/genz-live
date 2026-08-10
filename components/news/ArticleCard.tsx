@@ -28,6 +28,10 @@ export default function ArticleCard({
         <img
           src={article.image}
           alt={article.title}
+          loading="lazy"
+          decoding="async"
+          width="56"
+          height="56"
           className="w-14 h-14 rounded-lg object-cover shrink-0 group-hover:scale-105 transition-transform"
         />
         <div className="flex-1 min-w-0">
@@ -48,6 +52,10 @@ export default function ArticleCard({
         <img
           src={article.image}
           alt={article.title}
+          loading="lazy"
+          decoding="async"
+          width="96"
+          height="96"
           className="w-24 h-24 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform border border-white/10"
         />
         <div className="flex-1 min-w-0 space-y-1.5">
@@ -72,6 +80,10 @@ export default function ArticleCard({
         <img
           src={article.image}
           alt={article.title}
+          loading="lazy"
+          decoding="async"
+          width="400"
+          height="192"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />

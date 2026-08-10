@@ -19,6 +19,10 @@ export default function YouTubeLiveHub() {
             <img
               src={BRAND_ASSETS.ytBanner}
               alt="GenZ Live YouTube Banner"
+              loading="lazy"
+              decoding="async"
+              width="1280"
+              height="224"
               className="w-full h-full object-cover opacity-80"
               onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80'; }}
             />
@@ -30,6 +34,10 @@ export default function YouTubeLiveHub() {
               <img
                 src={BRAND_ASSETS.ytProfile}
                 alt="GenZ Live YouTube Profile"
+                loading="lazy"
+                decoding="async"
+                width="112"
+                height="112"
                 className="w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 border-slate-950 shadow-2xl bg-slate-900 object-cover"
               />
               <div className="space-y-1">
@@ -65,7 +73,15 @@ export default function YouTubeLiveHub() {
               className="glass-panel group overflow-hidden cursor-pointer border border-white/10 hover:border-red-500/40 transition-all duration-300"
             >
               <div className="relative h-44 overflow-hidden bg-slate-900">
-                <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" />
+                <img
+                  src={video.thumbnail}
+                  alt={video.title}
+                  loading="lazy"
+                  decoding="async"
+                  width="480"
+                  height="176"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
                     <Play className="w-5 h-5 fill-white ml-0.5" />

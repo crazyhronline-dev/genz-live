@@ -20,6 +20,10 @@ export default function HeroStory({ article, onSelect, variant = 'large' }: Hero
         <img
           src={article.image}
           alt={article.title}
+          loading="lazy"
+          decoding="async"
+          width="96"
+          height="96"
           className="w-24 h-24 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform border border-white/10"
         />
         <div className="flex-1 space-y-1.5 min-w-0">
@@ -38,17 +42,21 @@ export default function HeroStory({ article, onSelect, variant = 'large' }: Hero
     );
   }
 
-  // Large featured hero
+  // Large featured hero — LCP target element
   return (
     <div
       onClick={() => onSelect(article)}
       className="group relative rounded-2xl overflow-hidden border border-white/10 bg-navy-surface shadow-glass cursor-pointer hover:border-brand-purple/50 transition-all duration-300 min-h-[460px] flex flex-col justify-end p-6 md:p-8"
     >
-      {/* Background Image */}
+      {/* Background Image — fetchpriority="high" & loading="eager" for maximum LCP score */}
       <div className="absolute inset-0 z-0">
         <img
           src={article.image}
           alt={article.title}
+          loading="eager"
+          // @ts-expect-error React 19 fetchPriority attribute support
+          fetchpriority="high"
+          decoding="async"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
@@ -77,7 +85,15 @@ export default function HeroStory({ article, onSelect, variant = 'large' }: Hero
         <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400">
           <div className="flex items-center gap-3">
             {article.authorAvatar && (
-              <img src={article.authorAvatar} alt={article.author} className="w-8 h-8 rounded-full border border-brand-purple/50 object-cover" />
+              <img
+                src={article.authorAvatar}
+                alt={article.author}
+                loading="lazy"
+                decoding="async"
+                width="32"
+                height="32"
+                className="w-8 h-8 rounded-full border border-brand-purple/50 object-cover"
+              />
             )}
             <div>
               <span className="font-bold text-white block">{article.author}</span>

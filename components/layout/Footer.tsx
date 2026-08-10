@@ -3,8 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { Globe, ShieldCheck, Heart } from 'lucide-react';
+import Logo from '@/components/ui/Logo';
 import { YoutubeIcon, InstagramIcon, FacebookIcon } from '@/components/ui/SocialIcons';
-import { NAV_CATEGORIES, SITE_CONFIG, BRAND_ASSETS } from '@/config/site';
+import { NAV_CATEGORIES, SITE_CONFIG } from '@/config/site';
 
 interface FooterProps {
   /** When provided (home page), clicking a category updates page state.
@@ -19,27 +20,21 @@ export default function Footer({ setActiveCategory }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Brand Info */}
           <div className="md:col-span-5 space-y-4">
-            <a href="/">
-              <img
-                src={BRAND_ASSETS.logoLarge}
-                alt="GenZ Live Logo"
-                className="h-10 w-auto object-contain"
-                onError={(e) => { (e.target as HTMLImageElement).src = BRAND_ASSETS.logoMedium; }}
-              />
-            </a>
+            <Logo size="md" priority={false} />
             <p className="text-slate-300 font-semibold text-sm">{SITE_CONFIG.tagline}</p>
             <p className="text-slate-400 max-w-sm leading-relaxed">{SITE_CONFIG.description}</p>
             <div className="flex items-center gap-3 pt-2">
               {[
-                { href: SITE_CONFIG.youtube.url, Icon: YoutubeIcon, color: 'text-red-500 hover:bg-red-600' },
-                { href: SITE_CONFIG.social.instagram, Icon: InstagramIcon, color: 'text-pink-500 hover:bg-pink-600' },
-                { href: SITE_CONFIG.social.facebook, Icon: FacebookIcon, color: 'text-blue-500 hover:bg-blue-600' },
-              ].map(({ href, Icon, color }) => (
+                { href: SITE_CONFIG.youtube.url, Icon: YoutubeIcon, color: 'text-red-500 hover:bg-red-600', label: 'YouTube' },
+                { href: SITE_CONFIG.social.instagram, Icon: InstagramIcon, color: 'text-pink-500 hover:bg-pink-600', label: 'Instagram' },
+                { href: SITE_CONFIG.social.facebook, Icon: FacebookIcon, color: 'text-blue-500 hover:bg-blue-600', label: 'Facebook' },
+              ].map(({ href, Icon, color, label }) => (
                 <a
                   key={href}
                   href={href}
                   target="_blank"
                   rel="noreferrer"
+                  aria-label={label}
                   className={`w-8 h-8 rounded-full bg-slate-900 border border-white/10 flex items-center justify-center ${color} hover:text-white transition-colors`}
                 >
                   <Icon className="w-4 h-4" />
