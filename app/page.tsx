@@ -1,4 +1,5 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 import type { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -7,8 +8,6 @@ import HeroSection from '@/components/news/HeroSection';
 import CategoryHub from '@/components/news/CategoryHub';
 import CategorySection from '@/components/news/CategorySection';
 import Trending from '@/components/news/Trending';
-import YouTubeLiveHub from '@/components/media/YouTubeLiveHub';
-import Newsletter from '@/components/ui/Newsletter';
 import AdSlot from '@/components/ui/AdSlot';
 import { buildPageMetadata } from '@/lib/seo';
 import {
@@ -18,6 +17,15 @@ import {
   getCategoryArticles,
   getTrendingArticles,
 } from '@/lib/dataAccess';
+
+// Lazy-load heavy below-the-fold components to reduce initial JS bundle
+const YouTubeLiveHub = dynamic(() => import('@/components/media/YouTubeLiveHub'), {
+  loading: () => <div className="h-64 animate-pulse bg-slate-900/50 rounded-2xl mx-4" />,
+});
+const Newsletter = dynamic(() => import('@/components/ui/Newsletter'), {
+  loading: () => <div className="h-32 animate-pulse bg-slate-900/50 rounded-2xl mx-4" />,
+});
+
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'GenZ Live — The Voice of GenZ',

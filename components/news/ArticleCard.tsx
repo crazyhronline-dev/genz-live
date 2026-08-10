@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Bookmark, Clock, Eye, ArrowRight, Play, TrendingUp } from 'lucide-react';
 import type { Article, YouTubeVideo } from '@/types';
 
@@ -46,14 +47,13 @@ export default function ArticleCard({
     <article className="glass-panel group overflow-hidden flex flex-col border border-white/10 hover:border-brand-purple/40 transition-all duration-300 hover:-translate-y-1">
       {/* Thumbnail */}
       <Link href={href} onClick={handleClick} className="relative h-48 overflow-hidden cursor-pointer block">
-        <img
+        <Image
           src={article.image}
           alt={article.title}
+          fill
           loading="lazy"
-          decoding="async"
-          width="400"
-          height="192"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
 
@@ -117,12 +117,13 @@ export function LargeArticleCard({ article, onSelect }: ArticleCardProps) {
   return (
     <article className="glass-panel group overflow-hidden border border-white/10 hover:border-brand-purple/40 transition-all duration-300 flex flex-col md:flex-row gap-6 p-6">
       <Link href={href} onClick={handleClick} className="relative md:w-1/2 h-64 md:h-auto rounded-xl overflow-hidden cursor-pointer shrink-0 block">
-        <img
+        <Image
           src={article.image}
           alt={article.title}
-          loading="eager"
-          decoding="async"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          fill
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <span className="absolute top-3 left-3 category-badge text-[10px]">{article.categoryName}</span>
       </Link>
@@ -166,15 +167,16 @@ export function MediumArticleCard({ article, onSelect }: ArticleCardProps) {
       onClick={handleClick}
       className="glass-panel flex gap-4 items-center p-4 group cursor-pointer hover:border-brand-purple/40 transition-all block"
     >
-      <img
-        src={article.image}
-        alt={article.title}
-        loading="lazy"
-        decoding="async"
-        width="96"
-        height="96"
-        className="w-24 h-24 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform border border-white/10"
-      />
+      <div className="relative w-24 h-24 shrink-0">
+        <Image
+          src={article.image}
+          alt={article.title}
+          fill
+          loading="lazy"
+          sizes="96px"
+          className="rounded-xl object-cover group-hover:scale-105 transition-transform border border-white/10"
+        />
+      </div>
       <div className="flex-1 min-w-0 space-y-1.5">
         <span className="category-badge text-[10px]">{article.categoryName}</span>
         <h3 className="text-sm font-bold text-slate-100 group-hover:text-brand-purple transition-colors line-clamp-2">{article.title}</h3>
@@ -205,15 +207,16 @@ export function SmallArticleCard({ article, onSelect }: ArticleCardProps) {
       onClick={handleClick}
       className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-800/60 transition-all group text-left block"
     >
-      <img
-        src={article.image}
-        alt={article.title}
-        loading="lazy"
-        decoding="async"
-        width="56"
-        height="56"
-        className="w-14 h-14 rounded-lg object-cover shrink-0 group-hover:scale-105 transition-transform"
-      />
+      <div className="relative w-14 h-14 shrink-0">
+        <Image
+          src={article.image}
+          alt={article.title}
+          fill
+          loading="lazy"
+          sizes="56px"
+          className="rounded-lg object-cover group-hover:scale-105 transition-transform"
+        />
+      </div>
       <div className="flex-1 min-w-0">
         <span className="text-[10px] font-bold text-brand-purple uppercase">{article.categoryName}</span>
         <p className="text-xs font-bold text-slate-200 group-hover:text-white line-clamp-2 leading-snug mt-0.5">{article.title}</p>
@@ -271,14 +274,13 @@ export function VideoCard({ video, onSelect }: { video: YouTubeVideo; onSelect?:
       className="glass-panel group overflow-hidden cursor-pointer border border-white/10 hover:border-red-500/40 transition-all duration-300"
     >
       <div className="relative h-44 overflow-hidden bg-slate-900">
-        <img
+        <Image
           src={video.thumbnail}
           alt={video.title}
+          fill
           loading="lazy"
-          decoding="async"
-          width="480"
-          height="176"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
         />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
