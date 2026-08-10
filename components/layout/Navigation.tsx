@@ -55,9 +55,9 @@ export default function Navigation({ activeCategory, onSelect }: NavigationProps
   }, []);
 
   return (
-    <nav aria-label="Category navigation" className="hidden lg:block border-t border-white/5 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4">
-        <ul className="flex items-center gap-1.5 py-2" role="list">
+    <nav aria-label="Category navigation" className="block w-full border-t border-white/5 bg-slate-950/90 backdrop-blur-md sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 overflow-x-auto no-scrollbar">
+        <ul className="flex items-center gap-1.5 py-2 min-w-max" role="list">
           {/* Top 5 Primary Categories + All Feed */}
           {mainCategories.map((cat) => {
             const Icon = iconMap[cat.icon] ?? Sparkles;
