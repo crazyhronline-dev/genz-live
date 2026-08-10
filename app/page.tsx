@@ -1,158 +1,139 @@
-'use client';
-
-import React, { useState, useMemo } from 'react';
-
-// Layout components
-import Navbar from '@/components/layout/Navbar';
+import React from 'react';
+import type { Metadata } from 'next';
+import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-
-// News components
-import BreakingTicker from '@/components/news/BreakingTicker';
+import BreakingNews from '@/components/news/BreakingNews';
 import HeroSection from '@/components/news/HeroSection';
 import CategoryHub from '@/components/news/CategoryHub';
-
-// Media components
+import CategorySection from '@/components/news/CategorySection';
+import Trending from '@/components/news/Trending';
 import YouTubeLiveHub from '@/components/media/YouTubeLiveHub';
-
-// UI components
 import Newsletter from '@/components/ui/Newsletter';
+import AdSlot from '@/components/ui/AdSlot';
+import { buildPageMetadata } from '@/lib/seo';
+import {
+  getBreakingNews,
+  getFeaturedArticles,
+  getLatestArticles,
+  getCategoryArticles,
+  getTrendingArticles,
+} from '@/lib/dataFetcher';
 
-// Article reader (self-contained, includes modal logic)
-import ArticleModal from '@/components/news/ArticleModal';
+export const metadata: Metadata = buildPageMetadata();
 
-// Data & types
-import { ARTICLES, FEATURED_STORIES, YOUTUBE_VIDEOS } from '@/lib/newsData';
-import type { Article, BreakingHeadline } from '@/types';
-
-export default function HomePage() {
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStory, setSelectedStory] = useState<Article | null>(null);
-  const [savedIds, setSavedIds] = useState<string[]>(['f1', 'a1']);
-  const [showLiveStreamModal, setShowLiveStreamModal] = useState(false);
-
-  const filteredArticles = useMemo<Article[]>(() => {
-    return ARTICLES.filter((article) => {
-      const matchesCategory =
-        activeCategory === 'saved' ? savedIds.includes(article.id) :
-        activeCategory === 'all'   ? true :
-        article.category === activeCategory;
-
-      const matchesSearch = searchQuery.trim() === '' || (() => {
-        const q = searchQuery.toLowerCase();
-        return (
-          article.title.toLowerCase().includes(q) ||
-          article.categoryName.toLowerCase().includes(q) ||
-          article.author.toLowerCase().includes(q) ||
-          Boolean(article.subtitle?.toLowerCase().includes(q))
-        );
-      })();
-
-      return matchesCategory && matchesSearch;
-    });
-  }, [activeCategory, searchQuery, savedIds]);
-
-  const featuredStory = FEATURED_STORIES[0];
-  const secondaryStories = FEATURED_STORIES.slice(1, 4);
-
-  const relatedArticles = useMemo<Article[]>(() => {
-    if (!selectedStory) return [];
-    return ARTICLES.filter(a => a.id !== selectedStory.id && a.category === selectedStory.category);
-  }, [selectedStory]);
-
-  const handleToggleBookmark = (id: string) => {
-    setSavedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  };
-
-  const handleSelectHeadline = (headline: BreakingHeadline) => {
-    const match = ARTICLES.find(a => a.id === headline.id) ?? {
-      id: headline.id,
-      title: headline.text,
-      categoryName: headline.category,
-      category: headline.category.toLowerCase(),
-      publishedAt: headline.time,
-      author: 'GenZ Live Desk',
-      readTime: '2 min read',
-      views: '12.4k',
-      likes: 890,
-      image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
-      content: `<p>${headline.text}</p><p>Stay tuned to GenZ Live for continuous live updates on this breaking news story.</p>`,
-    };
-    setSelectedStory(match);
-  };
+export default async function HomePage() {
+  // Server-side data fetching via decoupled dataFetcher module
+  const [
+    breakingHeadlines,
+    heroData,
+    latestArticles,
+    worldArticles,
+    indiaArticles,
+    techArticles,
+    aiArticles,
+    trendingArticles,
+  ] = await Promise.all([
+    getBreakingNews(),
+    getFeaturedArticles(),
+    getLatestArticles(6),
+    getCategoryArticles('world', 3),
+    getCategoryArticles('india', 3),
+    getCategoryArticles('tech', 3),
+    getCategoryArticles('ai', 3),
+    getTrendingArticles(5),
+  ]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
-      <Navbar
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        onOpenLiveStream={() => setShowLiveStreamModal(true)}
-        savedCount={savedIds.length}
-      />
+    <div className="min-h-screen bg-navy-main text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
+      {/* Desktop & Mobile Header */}
+      <Header activeCategory="all" />
 
-      <BreakingTicker onSelectHeadline={handleSelectHeadline} />
+      {/* Breaking News Ticker */}
+      <BreakingNews headlines={breakingHeadlines} />
+
+      {/* Leaderboard Ad Placeholder */}
+      <div className="max-w-7xl mx-auto px-4 pt-6 flex justify-center">
+        <AdSlot size="leaderboard" slotId="home-top-leaderboard" />
+      </div>
 
       <main className="flex-1">
-        {activeCategory === 'all' && !searchQuery && (
-          <HeroSection
-            featuredStory={featuredStory}
-            secondaryStories={secondaryStories}
-            onSelectStory={setSelectedStory}
-          />
-        )}
-
-        <CategoryHub
-          articles={filteredArticles}
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
-          searchQuery={searchQuery}
-          onSelectStory={setSelectedStory}
-          savedIds={savedIds}
-          onToggleBookmark={handleToggleBookmark}
+        {/* Editorial Hero Section */}
+        <HeroSection
+          featuredStory={heroData.featuredStory}
+          secondaryStories={heroData.secondaryStories}
         />
 
+        {/* Latest News Feed + Sidebar (Trending + Ad) */}
+        <section className="py-8 max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Main Feed */}
+            <div className="lg:col-span-8">
+              <CategoryHub
+                articles={latestArticles}
+                activeCategory="all"
+              />
+            </div>
+
+            {/* Sidebar */}
+            <aside className="lg:col-span-4 space-y-6 pt-8">
+              {/* Numbered Trending Section (01..05) */}
+              <Trending articles={trendingArticles} />
+
+              {/* Sidebar Ad Placeholder */}
+              <AdSlot size="sidebar" slotId="home-sidebar-rect" className="w-full mx-auto" />
+            </aside>
+          </div>
+        </section>
+
+        {/* Category Sections Grid */}
+        <div className="max-w-7xl mx-auto px-4 space-y-4">
+          {/* World Section */}
+          <CategorySection
+            title="🌍 World News"
+            articles={worldArticles}
+            viewAllHref="/world"
+            maxItems={3}
+          />
+
+          {/* Ad Slot between sections */}
+          <div className="my-6 flex justify-center">
+            <AdSlot size="banner" slotId="home-mid-banner" />
+          </div>
+
+          {/* India Section */}
+          <CategorySection
+            title="🇮🇳 India News"
+            articles={indiaArticles}
+            viewAllHref="/india"
+            maxItems={3}
+          />
+
+          {/* Technology Section */}
+          <CategorySection
+            title="💻 Technology"
+            articles={techArticles}
+            viewAllHref="/technology"
+            maxItems={3}
+          />
+
+          {/* AI Section */}
+          <CategorySection
+            title="🤖 Artificial Intelligence"
+            articles={aiArticles}
+            viewAllHref="/ai"
+            maxItems={3}
+          />
+        </div>
+
+        {/* GenZ Live Videos Section */}
         <YouTubeLiveHub />
 
+        {/* Newsletter CTA ("Stay ahead of the story.") */}
         <Newsletter />
       </main>
 
-      <Footer setActiveCategory={setActiveCategory} />
-
-      {selectedStory && (
-        <ArticleModal
-          article={selectedStory}
-          onClose={() => setSelectedStory(null)}
-          isSaved={savedIds.includes(selectedStory.id)}
-          onToggleBookmark={handleToggleBookmark}
-          onSelectRelated={setSelectedStory}
-          relatedArticles={relatedArticles}
-        />
-      )}
-
-      {showLiveStreamModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-4xl bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-4 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="live-pulse">LIVE BROADCAST</span>
-                <h3 className="text-sm font-bold text-white">GenZ Live — 24/7 Global Stream</h3>
-              </div>
-              <button onClick={() => setShowLiveStreamModal(false)} className="p-1.5 rounded-full bg-slate-800 text-slate-400 hover:text-white">✕</button>
-            </div>
-            <div className="aspect-video w-full rounded-xl overflow-hidden bg-black">
-              <iframe
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${YOUTUBE_VIDEOS[0].embedId}?autoplay=1`}
-                title="GenZ Live Broadcast"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Global News Footer */}
+      <Footer />
     </div>
   );
 }

@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { TrendingUp, Flame } from 'lucide-react';
 import type { Article } from '@/types';
 
 interface TrendingProps {
   articles: Article[];
-  onSelect: (article: Article) => void;
+  onSelect?: (article: Article) => void;
   maxItems?: number;
   title?: string;
 }
@@ -30,20 +31,20 @@ export default function Trending({
 
       {/* Article List */}
       <ol className="space-y-3">
-        {displayed.map((article, idx) => (
-          <li key={article.id}>
-            <button
-              onClick={() => onSelect(article)}
-              className="w-full flex items-start gap-3 text-left group"
-            >
-              {/* Rank Number */}
+        {displayed.map((article, idx) => {
+          const href = `/${article.category}/${article.id}`;
+          const rank = idx + 1;
+
+          const content = (
+            <>
+              {/* Rank Number (01, 02, etc.) */}
               <span className={`text-xl font-extrabold shrink-0 mt-0.5 w-7 text-right leading-none ${
                 idx === 0 ? 'text-brand-orange' :
                 idx === 1 ? 'text-brand-purple' :
                 idx === 2 ? 'text-brand-cyan' :
                 'text-slate-600'
               }`}>
-                {idx + 1}
+                {rank < 10 ? `0${rank}` : rank}
               </span>
 
               <div className="flex-1 min-w-0">
@@ -56,13 +57,27 @@ export default function Trending({
                   <span>{article.views} views</span>
                 </div>
               </div>
-            </button>
+            </>
+          );
 
-            {idx < displayed.length - 1 && (
-              <div className="mt-3 h-px bg-white/5" />
-            )}
-          </li>
-        ))}
+          return (
+            <li key={article.id}>
+              {onSelect ? (
+                <button onClick={() => onSelect(article)} className="w-full flex items-start gap-3 text-left group">
+                  {content}
+                </button>
+              ) : (
+                <Link href={href} className="w-full flex items-start gap-3 text-left group">
+                  {content}
+                </Link>
+              )}
+
+              {idx < displayed.length - 1 && (
+                <div className="mt-3 h-px bg-white/5" />
+              )}
+            </li>
+          );
+        })}
       </ol>
     </aside>
   );

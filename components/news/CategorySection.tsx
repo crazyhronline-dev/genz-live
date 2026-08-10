@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import ArticleCard from '@/components/news/ArticleCard';
 import type { Article } from '@/types';
@@ -8,7 +9,7 @@ import type { Article } from '@/types';
 interface CategorySectionProps {
   title: string;
   articles: Article[];
-  onSelect: (article: Article) => void;
+  onSelect?: (article: Article) => void;
   savedIds?: string[];
   onToggleBookmark?: (id: string) => void;
   maxItems?: number;
@@ -39,12 +40,12 @@ export default function CategorySection({
           <h2 className="text-lg md:text-xl font-extrabold text-white font-heading">{title}</h2>
         </div>
         {viewAllHref && (
-          <a
+          <Link
             href={viewAllHref}
             className="flex items-center gap-1.5 text-xs font-bold text-brand-purple hover:text-purple-300 transition-colors"
           >
             View All <ArrowRight className="w-3.5 h-3.5" />
-          </a>
+          </Link>
         )}
       </div>
 

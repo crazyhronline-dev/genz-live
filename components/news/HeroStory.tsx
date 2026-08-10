@@ -1,20 +1,31 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Clock, Eye, ArrowUpRight, Sparkles } from 'lucide-react';
 import type { Article } from '@/types';
 
 interface HeroStoryProps {
   article: Article;
-  onSelect: (article: Article) => void;
+  onSelect?: (article: Article) => void;
   variant?: 'large' | 'small';
 }
 
 export default function HeroStory({ article, onSelect, variant = 'large' }: HeroStoryProps) {
+  const href = `/${article.category}/${article.id}`;
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (onSelect) {
+      e.preventDefault();
+      onSelect(article);
+    }
+  };
+
   if (variant === 'small') {
     return (
-      <div
-        onClick={() => onSelect(article)}
+      <Link
+        href={href}
+        onClick={handleClick}
         className="glass-panel p-4 flex gap-4 items-center group cursor-pointer hover:bg-slate-800/80 transition-all"
       >
         <img
@@ -38,17 +49,18 @@ export default function HeroStory({ article, onSelect, variant = 'large' }: Hero
             </span>
           </div>
         </div>
-      </div>
+      </Link>
     );
   }
 
   // Large featured hero — LCP target element
   return (
-    <div
-      onClick={() => onSelect(article)}
-      className="group relative rounded-2xl overflow-hidden border border-white/10 bg-navy-surface shadow-glass cursor-pointer hover:border-brand-purple/50 transition-all duration-300 min-h-[460px] flex flex-col justify-end p-6 md:p-8"
+    <Link
+      href={href}
+      onClick={handleClick}
+      className="group relative rounded-2xl overflow-hidden border border-white/10 bg-navy-surface shadow-glass cursor-pointer hover:border-brand-purple/50 transition-all duration-300 min-h-[460px] flex flex-col justify-end p-6 md:p-8 block"
     >
-      {/* Background Image — fetchpriority="high" & loading="eager" for maximum LCP score */}
+      {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
           src={article.image}
@@ -103,12 +115,12 @@ export default function HeroStory({ article, onSelect, variant = 'large' }: Hero
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-brand-purple" /> {article.readTime}</span>
             <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5 text-brand-cyan" /> {article.views}</span>
-            <button className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand-purple group-hover:bg-purple-500 text-white font-bold text-xs shadow-glow-purple transition-all">
+            <span className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand-purple group-hover:bg-purple-500 text-white font-bold text-xs shadow-glow-purple transition-all">
               Read Story <ArrowUpRight className="w-3.5 h-3.5" />
-            </button>
+            </span>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

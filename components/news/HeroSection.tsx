@@ -9,8 +9,8 @@ export default function HeroSection({ featuredStory, secondaryStories, onSelectS
   if (!featuredStory) return null;
 
   return (
-    <section className="py-8" aria-label="Featured stories">
-      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <section className="py-8 max-w-7xl mx-auto px-4" aria-label="Featured stories">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Hero — large variant */}
         <div className="lg:col-span-8">
           <HeroStory article={featuredStory} onSelect={onSelectStory} variant="large" />

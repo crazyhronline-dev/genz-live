@@ -4,11 +4,26 @@ import React from 'react';
 import { Sparkles, SearchX } from 'lucide-react';
 import ArticleCard from '@/components/news/ArticleCard';
 import { NAV_CATEGORIES } from '@/config/site';
-import type { CategoryHubProps } from '@/types';
+import type { Article } from '@/types';
+
+interface CategoryHubProps {
+  articles: Article[];
+  activeCategory: string;
+  setActiveCategory?: (cat: string) => void;
+  searchQuery?: string;
+  onSelectStory?: (article: Article) => void;
+  savedIds?: string[];
+  onToggleBookmark?: (id: string) => void;
+}
 
 export default function CategoryHub({
-  articles, activeCategory, setActiveCategory,
-  searchQuery, onSelectStory, savedIds, onToggleBookmark,
+  articles,
+  activeCategory,
+  setActiveCategory,
+  searchQuery,
+  onSelectStory,
+  savedIds = [],
+  onToggleBookmark,
 }: CategoryHubProps) {
   const activeLabel = activeCategory === 'saved'
     ? 'Saved Articles'
@@ -32,21 +47,23 @@ export default function CategoryHub({
           </div>
 
           {/* Inline Category Filters (mobile/tablet) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 no-scrollbar lg:hidden">
-            {NAV_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                  activeCategory === cat.id
-                    ? 'bg-brand-purple text-white shadow-glow-purple'
-                    : 'bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
+          {setActiveCategory && (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 no-scrollbar lg:hidden">
+              {NAV_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                    activeCategory === cat.id
+                      ? 'bg-brand-purple text-white shadow-glow-purple'
+                      : 'bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Empty State */}
@@ -59,12 +76,14 @@ export default function CategoryHub({
                 ? "You haven't bookmarked any articles yet."
                 : 'Try adjusting your search or browse a different category.'}
             </p>
-            <button
-              onClick={() => setActiveCategory('all')}
-              className="btn-primary text-xs"
-            >
-              Back to All Feed
-            </button>
+            {setActiveCategory && (
+              <button
+                onClick={() => setActiveCategory('all')}
+                className="btn-primary text-xs"
+              >
+                Back to All Feed
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -72,7 +91,7 @@ export default function CategoryHub({
               <ArticleCard
                 key={article.id}
                 article={article}
-                onSelect={onSelectStory}
+                onSelect={onSelectStory ?? (() => {})}
                 isSaved={savedIds.includes(article.id)}
                 onToggleBookmark={onToggleBookmark}
                 variant="grid"

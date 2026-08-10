@@ -17,6 +17,7 @@ export interface Article {
   likes: number;
   image: string;
   isFeatured?: boolean;
+  isDemo?: boolean;
 }
 
 export interface Category {
@@ -84,11 +85,11 @@ export interface CategoryHubProps {
   searchQuery: string;
   onSelectStory: (article: Article) => void;
   savedIds: string[];
-  onToggleBookmark: (id: string) => void;
+  onToggleBookmark?: (id: string) => void;
 }
 
 export interface HeroSectionProps {
   featuredStory: Article;
   secondaryStories: Article[];
-  onSelectStory: (article: Article) => void;
+  onSelectStory?: (article: Article) => void;
 }
