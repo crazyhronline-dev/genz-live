@@ -1,67 +1,83 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { UserCircle2, Clock, Eye } from 'lucide-react';
-import StaticPage from '@/components/layout/StaticPage';
-import { ARTICLES } from '@/lib/newsData';
+import { User, ArrowLeft, BookOpen } from 'lucide-react';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import ArticleCard from '@/components/news/ArticleCard';
 import { buildPageMetadata } from '@/lib/seo';
+import { getArticlesByAuthor } from '@/lib/dataAccess';
 
-interface Params { params: Promise<{ slug: string }> }
+interface Params {
+  params: Promise<{ slug: string }>;
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const authorName = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   return buildPageMetadata({
-    title: `${authorName} — Author`,
-    description: `Articles and stories by ${authorName} on GenZ Live.`,
+    title: `${authorName} — Editorial Author`,
+    description: `Published articles, news reports, and analysis by ${authorName} on GenZ Live.`,
   });
 }
 
 export default async function AuthorPage({ params }: Params) {
   const { slug } = await params;
   const authorName = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
-  // Find articles by this author (slug-based match for now)
-  const authorArticles = ARTICLES.filter(a =>
-    a.author.toLowerCase().replace(/\s+/g, '-') === slug
-  );
+  const articles = await getArticlesByAuthor(slug);
 
   return (
-    <StaticPage title={authorName} subtitle={`Author at GenZ Live`}>
-      <div className="section-card flex items-center gap-5 mb-8">
-        <div className="w-20 h-20 rounded-2xl bg-navy-elevated flex items-center justify-center shrink-0 border border-white/10">
-          <UserCircle2 className="w-10 h-10 text-slate-500" />
-        </div>
-        <div>
-          <h2 style={{ marginTop: 0, borderBottom: 'none', paddingBottom: 0 }} className="text-xl font-extrabold text-white">{authorName}</h2>
-          <p className="text-slate-400 text-sm mt-1">Staff Writer · GenZ Live</p>
-          <p className="text-slate-500 text-xs mt-1">{authorArticles.length} article{authorArticles.length !== 1 ? 's' : ''} published</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-navy-main text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
+      <Header />
 
-      {authorArticles.length > 0 ? (
-        <div className="space-y-4">
-          <h2>Published Articles</h2>
-          {authorArticles.map(article => (
-            <div key={article.id} className="section-card flex gap-4 items-center">
-              <img src={article.image} alt={article.title} className="w-20 h-20 rounded-xl object-cover shrink-0" />
-              <div className="flex-1 min-w-0">
-                <span className="category-badge text-[10px]">{article.categoryName}</span>
-                <h3 className="text-sm font-bold text-white mt-1 line-clamp-2">{article.title}</h3>
-                <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{article.readTime}</span>
-                  <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{article.views}</span>
-                  <span>{article.publishedAt}</span>
-                </div>
-              </div>
+      <main className="flex-1 py-12 px-4">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Breadcrumb */}
+          <Link href="/" className="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors group">
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" /> Back to Home
+          </Link>
+
+          {/* Author Header Banner */}
+          <div className="glass-panel p-6 md:p-8 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            <div className="w-24 h-24 rounded-full bg-slate-800 border-2 border-brand-purple/50 flex items-center justify-center shrink-0 overflow-hidden shadow-glow-purple">
+              <User className="w-12 h-12 text-brand-purple" />
             </div>
-          ))}
+            <div className="space-y-2 text-center sm:text-left flex-1">
+              <span className="text-[10px] font-bold text-brand-cyan uppercase tracking-widest bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
+                Editorial Staff
+              </span>
+              <h1 className="text-2xl md:text-4xl font-extrabold text-white font-heading">{authorName}</h1>
+              <p className="text-sm text-slate-300">Staff Writer & Journalist at GenZ Live</p>
+              <p className="text-xs text-slate-400 max-w-2xl">
+                Covering global tech trends, cultural shifts, markets, and artificial intelligence for digital natives worldwide.
+              </p>
+            </div>
+          </div>
+
+          {/* Published Articles Feed */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-extrabold text-white font-heading flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-brand-purple" /> Published Articles ({articles.length})
+              </h2>
+            </div>
+
+            {articles.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {articles.map(article => (
+                  <ArticleCard key={article.id} article={article} variant="grid" />
+                ))}
+              </div>
+            ) : (
+              <div className="glass-panel p-12 text-center space-y-4 max-w-md mx-auto">
+                <p className="text-slate-400 text-sm">No published articles found for this author.</p>
+                <Link href="/" className="btn-primary text-xs">Return to Main Feed</Link>
+              </div>
+            )}
+          </div>
         </div>
-      ) : (
-        <div className="section-card text-center py-10 space-y-3">
-          <p className="text-slate-400">No articles found for this author.</p>
-          <Link href="/" className="inline-block btn-primary text-xs">Browse All Articles</Link>
-        </div>
-      )}
-    </StaticPage>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

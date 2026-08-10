@@ -132,7 +132,7 @@ function baseMetadata(): Metadata {
       images: [OG_IMAGE_URL],
     },
 
-    // Verification tags (fill in when domain is verified)
+    // Verification tags
     verification: {
       google: process.env.NEXT_PUBLIC_GOOGLE_VERIFY ?? '',
     },
@@ -257,37 +257,34 @@ export function buildCategoryMetadata(categoryId: string): Metadata {
 }
 
 // ----------------------------------------------------------------
-// buildArticleMetadata — for individual article pages (Phase 2)
+// buildArticleMetadata — for individual article pages
 // ----------------------------------------------------------------
-export function buildArticleMetadata(opts: {
-  title: string;
-  excerpt: string;
-  featuredImage?: string;
-  categorySlug?: string;
-  authorName?: string;
-  publishedAt?: string;
-  updatedAt?: string;
-  tags?: string[];
-  slug: string;
-  categoryRoute?: string;
+export function buildArticleMetadata(opts?: {
+  title?: string;
+  description?: string;
+  category?: string;
+  publishedTime?: string;
+  author?: string;
+  image?: string;
+  slug?: string;
 }): Metadata {
-  const canonicalPath = opts.categoryRoute
-    ? `/${opts.categoryRoute}/${opts.slug}`
-    : `/article/${opts.slug}`;
+  if (!opts || !opts.title) {
+    return buildPageMetadata({
+      title: 'News Article',
+      description: DESCRIPTION,
+    });
+  }
 
   return buildPageMetadata({
     title: opts.title,
-    description: opts.excerpt,
-    ogImage: opts.featuredImage ?? OG_IMAGE_URL,
+    description: opts.description ?? DESCRIPTION,
+    ogImage: opts.image ?? OG_IMAGE_URL,
     ogType: 'article',
-    canonicalPath,
-    keywords: [...(opts.tags ?? []), opts.categorySlug ?? '', opts.authorName ?? ''].filter(Boolean),
+    canonicalPath: opts.slug ? `/${opts.category ?? 'news'}/${opts.slug}` : undefined,
     article: {
-      publishedTime: opts.publishedAt,
-      modifiedTime: opts.updatedAt,
-      authors: opts.authorName ? [opts.authorName] : [SITE_NAME],
-      section: opts.categorySlug,
-      tags: opts.tags,
+      publishedTime: opts.publishedTime,
+      authors: opts.author ? [opts.author] : [SITE_NAME],
+      section: opts.category,
     },
   });
 }

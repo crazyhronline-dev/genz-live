@@ -78,16 +78,17 @@ model User {
 // ================================================================
 
 model Author {
-  id        String    @id @default(cuid())
-  slug      String    @unique
-  name      String
-  bio       String?   @db.Text
-  avatar    String?
-  email     String?   @unique
-  twitter   String?
-  instagram String?
-  website   String?
-  isActive  Boolean   @default(true)
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  bio         String?  @db.Text
+  avatar      String?
+  designation String?  /// e.g. "Senior Tech Editor"
+  email       String?  @unique
+  twitter     String?
+  instagram   String?
+  website     String?
+  isActive    Boolean  @default(true)
 
   // Optional link to a platform User account
   userId String? @unique
@@ -161,25 +162,33 @@ model Tag {
 // ================================================================
 
 model Article {
-  id              String        @id @default(cuid())
-  slug            String        @unique
-  title           String
-  subtitle        String?
-  excerpt         String?       @db.Text  /// Short summary for cards and SEO
-  content         String        @db.LongText
-  status          ArticleStatus @default(DRAFT)
-  publishedAt     DateTime?
-  scheduledAt     DateTime?     /// For SCHEDULED status
-  featuredImage   String?
-  isFeatured      Boolean       @default(false)
-  isBreaking      Boolean       @default(false)
-  views           Int           @default(0)
-  likes           Int           @default(0)
-  readTime        String?       /// e.g. "4 min read"
+  id                   String        @id @default(cuid())
+  slug                 String        @unique
+  title                String
+  subtitle             String?
+  excerpt              String?       @db.Text  /// Short summary for cards and SEO
+  content              String        @db.LongText
+  status               ArticleStatus @default(DRAFT)
+  publishedAt          DateTime?
+  scheduledAt          DateTime?     /// For SCHEDULED status
+  featuredImage        String?
+  featuredImageAlt     String?
+  featuredImageCaption String?
+  featuredImageCredit  String?
+  canonicalUrl         String?
+  youtubeUrl           String?
+  isFeatured           Boolean       @default(false)
+  isBreaking           Boolean       @default(false)
+  isTrending           Boolean       @default(false)
+  views                Int           @default(0)
+  likes                Int           @default(0)
+  readTime             String?       /// e.g. "4 min read"
 
-  // SEO
-  metaTitle       String?
-  metaDescription String?       @db.Text
+  // SEO Override fields
+  seoTitle             String?
+  seoDescription       String?       @db.Text
+  metaTitle            String?
+  metaDescription      String?       @db.Text
 
   // Foreign Keys
   categoryId String
@@ -206,6 +215,7 @@ model Article {
   @@index([authorId])
   @@index([isFeatured])
   @@index([isBreaking])
+  @@index([isTrending])
   @@index([createdAt])
   @@map("articles")
 }
@@ -260,7 +270,7 @@ model Video {
   slug        String      @unique
   title       String
   description String?     @db.Text
-  youtubeId   String      @unique /// YouTube video ID (e.g. dQw4w9WgXcQ)
+  youtubeId   String      @unique /// YouTube video ID
   thumbnail   String?
   duration    String?     /// e.g. "14:25" or "LIVE"
   views       Int         @default(0)
@@ -292,14 +302,17 @@ model BreakingNews {
   id        String    @id @default(cuid())
   text      String
   category  String    /// Display label (e.g. "AI", "India", "Markets")
+  priority  Int       @default(0)
   isActive  Boolean   @default(true)
   sortOrder Int       @default(0)
+  startAt   DateTime  @default(now())
   expiresAt DateTime? /// Auto-deactivate after this time
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([isActive])
+  @@index([startAt])
   @@index([expiresAt])
   @@index([sortOrder])
   @@index([createdAt])

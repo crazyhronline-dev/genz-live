@@ -1,22 +1,14 @@
-// app/sitemap.ts
-// Next.js App Router — generates /sitemap.xml automatically at build time
-// Phase 1: static routes only. Phase 2 will add dynamic article URLs from DB.
-// Docs: https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
-
 import type { MetadataRoute } from 'next';
 import { SITE_CONFIG, NAV_CATEGORIES } from '@/config/site';
+import { getLatestArticles } from '@/lib/dataAccess';
 
 const domain = SITE_CONFIG.domain;
-
-// Build timestamp — updated on each deployment
 const NOW = new Date().toISOString();
 
-// Category ID → URL slug mapping
 const CAT_HREF: Record<string, string> = { tech: '/technology' };
 const catHref = (id: string) => CAT_HREF[id] ?? `/${id}`;
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  // ── Static core routes ──────────────────────────────────────
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: domain,
@@ -38,7 +30,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // ── Category routes ─────────────────────────────────────────
   const categoryRoutes: MetadataRoute.Sitemap = NAV_CATEGORIES
     .filter(cat => cat.id !== 'all')
     .map(cat => ({
@@ -48,7 +39,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     }));
 
-  // ── Editorial / legal static pages ──────────────────────────
   const editorialRoutes: MetadataRoute.Sitemap = [
     { url: `${domain}/about`,              priority: 0.7, changeFrequency: 'monthly' as const },
     { url: `${domain}/contact`,            priority: 0.6, changeFrequency: 'monthly' as const },
@@ -59,15 +49,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${domain}/disclaimer`,         priority: 0.4, changeFrequency: 'monthly' as const },
   ].map(r => ({ ...r, lastModified: NOW }));
 
-  // ── Phase 2 placeholder: dynamic article routes will be added here ──
-  // Example:
-  // const articles = await prisma.article.findMany({ where: { status: 'PUBLISHED' }, select: { slug: true, category: { select: { slug: true } }, updatedAt: true } });
-  // const articleRoutes = articles.map(a => ({ url: `${domain}/${a.category.slug}/${a.slug}`, lastModified: a.updatedAt, changeFrequency: 'weekly', priority: 0.8 }));
+  // Query published articles for sitemap
+  const latestArticles = await getLatestArticles(50);
+  const articleRoutes: MetadataRoute.Sitemap = latestArticles.map(a => ({
+    url: `${domain}/${a.category}/${a.slug ?? a.id}`,
+    lastModified: NOW,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
 
   return [
     ...staticRoutes,
     ...categoryRoutes,
     ...editorialRoutes,
-    // ...articleRoutes, // Phase 2
+    ...articleRoutes,
   ];
 }

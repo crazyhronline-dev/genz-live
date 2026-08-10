@@ -12,13 +12,21 @@ import ArticleModal from '@/components/news/ArticleModal';
 import AdSlot from '@/components/ui/AdSlot';
 import { ARTICLES, BREAKING_HEADLINES } from '@/lib/newsData';
 import { NAV_CATEGORIES, SITE_CONFIG } from '@/config/site';
-import type { Article } from '@/types';
+import type { Article, BreakingHeadline } from '@/types';
 
 interface CategoryPageClientProps {
   category: string;
+  initialArticles?: Article[];
+  initialTrending?: Article[];
+  initialBreaking?: BreakingHeadline[];
 }
 
-export default function CategoryPageClient({ category }: CategoryPageClientProps) {
+export default function CategoryPageClient({
+  category,
+  initialArticles,
+  initialTrending,
+  initialBreaking,
+}: CategoryPageClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStory, setSelectedStory] = useState<Article | null>(null);
   const [savedIds, setSavedIds] = useState<string[]>([]);
@@ -26,23 +34,26 @@ export default function CategoryPageClient({ category }: CategoryPageClientProps
   const catMeta = NAV_CATEGORIES.find(c => c.id === category);
   const catName = catMeta?.name.replace(/^[\p{Emoji}\s]+/u, '').trim() ?? category;
 
+  const rawArticles = initialArticles && initialArticles.length > 0
+    ? initialArticles
+    : ARTICLES.filter(a => category === 'all' || a.category === category);
+
   const categoryArticles = useMemo(() => {
-    return ARTICLES.filter(a => {
-      const matchCat = category === 'all' || a.category === category;
+    return rawArticles.filter(a => {
       const q = searchQuery.toLowerCase();
-      const matchSearch = !q || a.title.toLowerCase().includes(q) || a.author.toLowerCase().includes(q);
-      return matchCat && matchSearch;
+      return !q || a.title.toLowerCase().includes(q) || a.author.toLowerCase().includes(q);
     });
-  }, [category, searchQuery]);
+  }, [rawArticles, searchQuery]);
 
   const featuredStory = categoryArticles[0];
   const remainingArticles = categoryArticles.slice(1);
-  const trendingArticles = ARTICLES.slice(0, 5);
+  const trendingArticles = initialTrending && initialTrending.length > 0 ? initialTrending : ARTICLES.slice(0, 5);
+  const headlines = initialBreaking && initialBreaking.length > 0 ? initialBreaking : BREAKING_HEADLINES;
 
   const relatedArticles = useMemo(() => {
     if (!selectedStory) return [];
-    return ARTICLES.filter(a => a.id !== selectedStory.id && a.category === selectedStory.category);
-  }, [selectedStory]);
+    return rawArticles.filter(a => a.id !== selectedStory.id && a.category === selectedStory.category);
+  }, [selectedStory, rawArticles]);
 
   const handleToggleBookmark = (id: string) => {
     setSavedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -52,7 +63,7 @@ export default function CategoryPageClient({ category }: CategoryPageClientProps
     <div className="min-h-screen bg-navy-main text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
       <Header activeCategory={category} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
-      <BreakingNews headlines={BREAKING_HEADLINES} />
+      <BreakingNews headlines={headlines} />
 
       {/* Category Hero Banner */}
       <div className="bg-navy-surface border-b border-white/5 py-8 md:py-12">

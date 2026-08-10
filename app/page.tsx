@@ -17,12 +17,12 @@ import {
   getLatestArticles,
   getCategoryArticles,
   getTrendingArticles,
-} from '@/lib/dataFetcher';
+} from '@/lib/dataAccess';
 
 export const metadata: Metadata = buildPageMetadata();
 
 export default async function HomePage() {
-  // Server-side data fetching via decoupled dataFetcher module
+  // Server-side data access engine
   const [
     breakingHeadlines,
     heroData,
@@ -38,20 +38,20 @@ export default async function HomePage() {
     getLatestArticles(6),
     getCategoryArticles('world', 3),
     getCategoryArticles('india', 3),
-    getCategoryArticles('tech', 3),
+    getCategoryArticles('technology', 3),
     getCategoryArticles('ai', 3),
     getTrendingArticles(5),
   ]);
 
   return (
     <div className="min-h-screen bg-navy-main text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
-      {/* Desktop & Mobile Header */}
+      {/* Header */}
       <Header activeCategory="all" />
 
       {/* Breaking News Ticker */}
       <BreakingNews headlines={breakingHeadlines} />
 
-      {/* Leaderboard Ad Placeholder */}
+      {/* Top Leaderboard Ad Placeholder */}
       <div className="max-w-7xl mx-auto px-4 pt-6 flex justify-center">
         <AdSlot size="leaderboard" slotId="home-top-leaderboard" />
       </div>

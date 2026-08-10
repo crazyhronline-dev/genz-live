@@ -1,66 +1,73 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Hash, Clock, Eye } from 'lucide-react';
-import StaticPage from '@/components/layout/StaticPage';
-import { ARTICLES } from '@/lib/newsData';
+import { Hash, ArrowLeft } from 'lucide-react';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import ArticleCard from '@/components/news/ArticleCard';
 import { buildPageMetadata } from '@/lib/seo';
+import { getArticlesByTag } from '@/lib/dataAccess';
 
-interface Params { params: Promise<{ slug: string }> }
+interface Params {
+  params: Promise<{ slug: string }>;
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const tagName = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   return buildPageMetadata({
-    title: `#${tagName} — Tag`,
-    description: `All GenZ Live articles tagged with #${tagName}.`,
+    title: `#${tagName} — Topic Tag`,
+    description: `All published GenZ Live news articles, analysis, and stories tagged with #${tagName}.`,
   });
 }
 
 export default async function TagPage({ params }: Params) {
   const { slug } = await params;
   const tagName = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
-  // Tag matching: match category or keyword in title (placeholder until real tag system)
-  const tagArticles = ARTICLES.filter(a =>
-    a.category === slug || a.title.toLowerCase().includes(slug.replace(/-/g, ' '))
-  );
+  const articles = await getArticlesByTag(slug);
 
   return (
-    <StaticPage title={`#${tagName}`} subtitle={`${tagArticles.length} article${tagArticles.length !== 1 ? 's' : ''} tagged`}>
-      <div className="section-card flex items-center gap-4 mb-6">
-        <div className="w-12 h-12 rounded-xl bg-brand-purple/20 border border-brand-purple/30 flex items-center justify-center">
-          <Hash className="w-6 h-6 text-brand-purple" />
-        </div>
-        <div>
-          <h2 style={{ marginTop: 0, borderBottom: 'none', paddingBottom: 0 }}>#{tagName}</h2>
-          <p className="text-slate-500 text-xs">{tagArticles.length} article{tagArticles.length !== 1 ? 's' : ''} · GenZ Live</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-navy-main text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
+      <Header />
 
-      {tagArticles.length > 0 ? (
-        <div className="space-y-4">
-          {tagArticles.map(article => (
-            <div key={article.id} className="section-card flex gap-4 items-center">
-              <img src={article.image} alt={article.title} className="w-20 h-20 rounded-xl object-cover shrink-0" />
-              <div className="flex-1 min-w-0">
-                <span className="category-badge text-[10px]">{article.categoryName}</span>
-                <h3 className="text-sm font-bold text-white mt-1 line-clamp-2">{article.title}</h3>
-                <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                  <span>{article.author}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{article.readTime}</span>
-                  <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{article.views}</span>
-                </div>
-              </div>
+      <main className="flex-1 py-12 px-4">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Breadcrumb */}
+          <Link href="/" className="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors group">
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" /> Back to Home
+          </Link>
+
+          {/* Tag Banner */}
+          <div className="glass-panel p-6 md:p-8 rounded-2xl border border-white/10 flex items-center gap-6">
+            <div className="w-16 h-16 rounded-2xl bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center shrink-0 shadow-glow-purple">
+              <Hash className="w-8 h-8 text-brand-purple" />
             </div>
-          ))}
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-brand-purple uppercase tracking-widest">Topic Tag</span>
+              <h1 className="text-2xl md:text-4xl font-extrabold text-white font-heading">#{tagName}</h1>
+              <p className="text-xs text-slate-400">
+                {articles.length} story{articles.length !== 1 ? 'ies' : ''} tagged with #{tagName}
+              </p>
+            </div>
+          </div>
+
+          {/* Tagged Articles Grid */}
+          {articles.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {articles.map(article => (
+                <ArticleCard key={article.id} article={article} variant="grid" />
+              ))}
+            </div>
+          ) : (
+            <div className="glass-panel p-12 text-center space-y-4 max-w-md mx-auto">
+              <Hash className="w-10 h-10 text-slate-600 mx-auto" />
+              <p className="text-slate-400 text-sm">No articles tagged with #{tagName} yet.</p>
+              <Link href="/" className="btn-primary text-xs">Browse Main Feed</Link>
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="section-card text-center py-10 space-y-3">
-          <Hash className="w-10 h-10 text-slate-600 mx-auto" />
-          <p className="text-slate-400">No articles found for this tag yet.</p>
-          <Link href="/" className="inline-block btn-primary text-xs">Browse All News</Link>
-        </div>
-      )}
-    </StaticPage>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

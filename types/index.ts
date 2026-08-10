@@ -1,10 +1,21 @@
 // GenZ Live — Centralized Type Definitions
 
+export interface ArticleTagItem {
+  slug: string;
+  name: string;
+}
+
+export interface ArticleSourceItem {
+  name: string;
+  url?: string;
+}
+
 export interface Article {
   id: string;
   slug?: string;
   title: string;
   subtitle?: string;
+  excerpt?: string;
   content: string;
   category: string;
   categoryName: string;
@@ -16,8 +27,17 @@ export interface Article {
   views: string;
   likes: number;
   image: string;
+  imageAlt?: string;
+  imageCaption?: string;
+  imageCredit?: string;
   isFeatured?: boolean;
   isDemo?: boolean;
+  seoTitle?: string;
+  seoDescription?: string;
+  canonicalUrl?: string;
+  youtubeUrl?: string;
+  source?: ArticleSourceItem;
+  tags?: ArticleTagItem[];
 }
 
 export interface Category {
@@ -81,10 +101,10 @@ export interface ArticleModalProps {
 export interface CategoryHubProps {
   articles: Article[];
   activeCategory: string;
-  setActiveCategory: (cat: string) => void;
-  searchQuery: string;
-  onSelectStory: (article: Article) => void;
-  savedIds: string[];
+  setActiveCategory?: (cat: string) => void;
+  searchQuery?: string;
+  onSelectStory?: (article: Article) => void;
+  savedIds?: string[];
   onToggleBookmark?: (id: string) => void;
 }
 
