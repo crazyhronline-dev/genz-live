@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { BRAND_ASSETS, SITE_CONFIG } from '@/config/site';
 
