@@ -11,9 +11,9 @@ interface LogoProps {
 }
 
 const HEIGHT_CLASSES = {
-  sm: 'h-11 md:h-12',
-  md: 'h-14 md:h-16',
-  lg: 'h-16 md:h-20 lg:h-24',
+  sm: 'h-10 md:h-11',
+  md: 'h-12 md:h-14',
+  lg: 'h-14 md:h-16 lg:h-18',
   xl: 'h-20 md:h-24 lg:h-28',
 } as const;
 

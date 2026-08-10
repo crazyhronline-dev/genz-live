@@ -64,8 +64,8 @@ export default function Header({
         </div>
 
         {/* Main Header Row */}
-        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
-          <Logo size="xl" />
+        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
+          <Logo size="lg" />
 
           <div className="flex items-center gap-2.5">
             {/* Desktop Search */}
