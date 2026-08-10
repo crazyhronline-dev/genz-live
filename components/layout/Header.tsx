@@ -64,8 +64,8 @@ export default function Header({
         </div>
 
         {/* Main Header Row */}
-        <div className="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
-          <Logo size="lg" />
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
+          <Logo size="xl" />
 
           <div className="flex items-center gap-2.5">
             {/* Desktop Search */}
@@ -156,10 +156,8 @@ export default function Header({
           </div>
         )}
 
-        {/* Desktop Category Navigation */}
-        {onCategoryChange && (
-          <Navigation activeCategory={activeCategory} onSelect={onCategoryChange} />
-        )}
+        {/* Desktop Category Navigation — always visible on all pages */}
+        <Navigation activeCategory={activeCategory} onSelect={onCategoryChange ?? (() => {})} />
       </header>
 
       {/* Mobile Navigation Drawer */}
