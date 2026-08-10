@@ -46,6 +46,25 @@ setTimeout(() => {
   setInterval(selfPing, PING_INTERVAL_MS);
 }, 30 * 1000);
 
+// ─── Automated Cache Purge ──────────────────────────────────────────────────
+// Automatically purges .next/cache every 15 minutes to guarantee fresh content
+const CACHE_PURGE_INTERVAL_MS = 15 * 60 * 1000;
+function autoCleanCache() {
+  try {
+    const fs = require('fs');
+    const cachePath = path.join(dir, '.next', 'cache');
+    if (fs.existsSync(cachePath)) {
+      fs.rmSync(cachePath, { recursive: true, force: true });
+    }
+  } catch (e) {
+    // Silently ignore filesystem lock exceptions
+  }
+}
+setTimeout(() => {
+  autoCleanCache();
+  setInterval(autoCleanCache, CACHE_PURGE_INTERVAL_MS);
+}, 60 * 1000);
+
 // ─── Graceful shutdown ────────────────────────────────────────────────────────
 process.on('SIGTERM', () => {
   process.exit(0);
