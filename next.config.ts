@@ -27,37 +27,6 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-icons",
     ],
   },
-
-  async headers() {
-    return [
-      // Immutable static assets — browser never re-fetches
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      // Brand images & fonts — long cache
-      {
-        source: "/:all*(svg|png|jpg|jpeg|webp|avif|ico|woff2|woff)",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      // HTML pages — revalidate frequently but serve stale while refreshing
-      {
-        source: "/(.*)",
-        headers: [
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-          // Serve cached HTML for up to 60s, then revalidate in background
-          { key: "Cache-Control", value: "public, s-maxage=60, stale-while-revalidate=300" },
-        ],
-      },
-    ];
-  },
 };
 
 export default nextConfig;
