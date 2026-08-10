@@ -1,27 +1,89 @@
-# Dependencies
+# ================================================================
+# GenZ Live — .gitignore
+# ================================================================
+
+# ----------------------------------------------------------------
+# ENVIRONMENT VARIABLES — never commit secrets
+# ----------------------------------------------------------------
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.staging
+.env.*.local
+
+# ----------------------------------------------------------------
+# DEPENDENCIES
+# ----------------------------------------------------------------
 node_modules/
 .pnpm-store/
+.yarn/
+.pnp
+.pnp.js
 
-# Next.js Build Outputs
+# ----------------------------------------------------------------
+# NEXT.JS BUILD OUTPUTS
+# ----------------------------------------------------------------
 .next/
 out/
 build/
 dist/
 
-# Prisma
+# ----------------------------------------------------------------
+# PRISMA — local SQLite dev files (not used, but safety catch)
+# ----------------------------------------------------------------
 /prisma/*.db
 /prisma/*.db-journal
+/prisma/migrations/
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Logs
+# ----------------------------------------------------------------
+# LOGS
+# ----------------------------------------------------------------
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+logs/
 
-# System Files
+# ----------------------------------------------------------------
+# TYPESCRIPT BUILD INFO
+# ----------------------------------------------------------------
+*.tsbuildinfo
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# ----------------------------------------------------------------
+# TESTING (Phase 2+)
+# ----------------------------------------------------------------
+/coverage
+/.nyc_output
+
+# ----------------------------------------------------------------
+# SYSTEM & EDITOR FILES
+# ----------------------------------------------------------------
 .DS_Store
 Thumbs.db
+*.pem
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ----------------------------------------------------------------
+# UPLOADS & MEDIA (local dev uploads, not committed)
+# ----------------------------------------------------------------
+/public/uploads/
+/uploads/
+
+# ----------------------------------------------------------------
+# MISC GENERATED
+# ----------------------------------------------------------------
+.vercel
+.turbo
