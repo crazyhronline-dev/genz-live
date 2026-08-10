@@ -21,6 +21,7 @@ enum UserRole {
   ADMIN
   EDITOR
   AUTHOR
+  WRITER
   VIEWER
 }
 
