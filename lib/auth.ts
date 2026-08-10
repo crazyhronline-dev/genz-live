@@ -9,7 +9,19 @@ import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import type { UserRole } from '@prisma/client';
 
-const AUTH_SECRET = process.env.AUTH_SECRET || 'genz-live-secret-key-change-in-production-2026';
+function getAuthSecret(): string {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret || !secret.trim()) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'CRITICAL SECURITY CONFIGURATION ERROR: AUTH_SECRET environment variable is missing in production!'
+      );
+    }
+    return 'genz-live-dev-secret-key-do-not-use-in-prod-2026';
+  }
+  return secret;
+}
+
 const COOKIE_NAME = 'genz_admin_session';
 const PBKDF2_ITERATIONS = 210000; // OWASP recommended iterations
 
@@ -45,7 +57,8 @@ export function verifyPassword(password: string, storedHash: string): boolean {
 
 /** 3. Sign Token */
 function signPayload(payload: string): string {
-  const hmac = crypto.createHmac('sha256', AUTH_SECRET);
+  const secret = getAuthSecret();
+  const hmac = crypto.createHmac('sha256', secret);
   hmac.update(payload);
   const signature = hmac.digest('hex');
   return `${payload}.${signature}`;
@@ -54,12 +67,13 @@ function signPayload(payload: string): string {
 /** 4. Verify & Parse Signed Token with Length Checks */
 function verifyToken(token: string): Record<string, unknown> | null {
   try {
+    const secret = getAuthSecret();
     const lastDotIndex = token.lastIndexOf('.');
     if (lastDotIndex === -1) return null;
     const payload = token.slice(0, lastDotIndex);
     const signature = token.slice(lastDotIndex + 1);
 
-    const expectedHmac = crypto.createHmac('sha256', AUTH_SECRET);
+    const expectedHmac = crypto.createHmac('sha256', secret);
     expectedHmac.update(payload);
     const expectedSignature = expectedHmac.digest('hex');
 
