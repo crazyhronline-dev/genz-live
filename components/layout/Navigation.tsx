@@ -33,35 +33,36 @@ interface NavigationProps {
 }
 
 export default function Navigation({ activeCategory, onSelect }: NavigationProps) {
+  // Display top 10 categories in header
+  const desktopCategories = NAV_CATEGORIES.slice(0, 10);
+
   return (
-    <nav aria-label="Category navigation" className="block w-full border-t border-white/5 bg-slate-950/90 backdrop-blur-md sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 overflow-x-auto no-scrollbar">
-        <ul className="flex items-center justify-between gap-1 py-2 min-w-max" role="list">
-          {NAV_CATEGORIES.map((cat) => {
-            const Icon = iconMap[cat.icon] ?? Sparkles;
-            const isActive = activeCategory === cat.id;
-            const href = ROUTES[cat.id] ?? '/';
-            return (
-              <li key={cat.id}>
-                <Link
-                  href={href}
-                  id={`nav-${cat.id}`}
-                  onClick={() => onSelect(cat.id)}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
-                    isActive
-                      ? 'bg-gradient-to-r from-brand-purple to-brand-cyan text-white shadow-md shadow-purple-900/40 scale-105'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-brand-purple'}`} />
-                  {cat.name}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+    <nav aria-label="Header category navigation" className="w-full">
+      <ul className="flex items-center justify-end gap-1 overflow-x-auto no-scrollbar" role="list">
+        {desktopCategories.map((cat) => {
+          const Icon = iconMap[cat.icon] ?? Sparkles;
+          const isActive = activeCategory === cat.id;
+          const href = ROUTES[cat.id] ?? '/';
+          return (
+            <li key={cat.id}>
+              <Link
+                href={href}
+                id={`header-nav-${cat.id}`}
+                onClick={() => onSelect(cat.id)}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] xl:text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+                  isActive
+                    ? 'bg-gradient-to-r from-brand-purple to-brand-cyan text-white shadow-sm shadow-purple-900/40 font-bold scale-105'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-brand-purple'}`} />
+                {cat.name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </nav>
   );
 }
