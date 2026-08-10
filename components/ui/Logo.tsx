@@ -10,26 +10,28 @@ interface LogoProps {
   priority?: boolean;
 }
 
-const SIZES = {
-  sm: { height: 44, width: 132, src: BRAND_ASSETS.logoMedium },
-  md: { height: 56, width: 168, src: BRAND_ASSETS.logoLarge },
-  lg: { height: 72, width: 216, src: BRAND_ASSETS.logoLarge },
-  xl: { height: 90, width: 270, src: BRAND_ASSETS.logoLarge },
+// Square logo — height drives size, width is auto
+const HEIGHTS = {
+  sm: 48,
+  md: 64,
+  lg: 80,
+  xl: 100,
 } as const;
 
 export default function Logo({ size = 'md', className = '', priority = true }: LogoProps) {
-  const { height, width, src } = SIZES[size];
+  const h = HEIGHTS[size];
 
   return (
     <Link href="/" className={`group flex items-center shrink-0 ${className}`} aria-label={SITE_CONFIG.name}>
       <img
-        src={src}
+        src={BRAND_ASSETS.logoLarge}
         alt={`${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`}
-        width={width}
-        height={height}
+        width={h}
+        height={h}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
-        className="h-11 sm:h-14 md:h-16 lg:h-18 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+        style={{ height: h, width: 'auto' }}
+        className="object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_0_12px_rgba(139,92,246,0.4)]"
         onError={(e) => { (e.target as HTMLImageElement).src = BRAND_ASSETS.logoLarge; }}
       />
     </Link>

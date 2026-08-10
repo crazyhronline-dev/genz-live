@@ -15,9 +15,9 @@ const SITE_NAME = SITE_CONFIG.name;
 const TAGLINE = SITE_CONFIG.tagline;
 const DESCRIPTION = SITE_CONFIG.description;
 
-// OG image: absolute URL to the master square brand asset
-const OG_IMAGE_URL = `${DOMAIN}/brand/MASTER_SQUARE_2000x2000.png`;
-const OG_IMAGE_WIDE_URL = `${DOMAIN}/brand/06_Website_Logo_1200x400.png`;
+// OG image: absolute URL to the new square brand logo
+const OG_IMAGE_URL = `${DOMAIN}/brand/logo_square.png`;
+const OG_IMAGE_WIDE_URL = `${DOMAIN}/brand/logo_square.png`;
 
 // ----------------------------------------------------------------
 // Global site keywords
@@ -79,9 +79,9 @@ function baseMetadata(): Metadata {
       icon: [
         { url: '/favicon.ico', sizes: 'any' },
         { url: '/favicon.png', type: 'image/png', sizes: '800x800' },
-        { url: '/brand/01_YouTube_Profile_800x800.png', type: 'image/png' },
+        { url: '/brand/logo_square.png', type: 'image/png' },
       ],
-      apple: '/brand/01_YouTube_Profile_800x800.png',
+      apple: '/brand/logo_square.png',
       shortcut: '/favicon.ico',
     },
 

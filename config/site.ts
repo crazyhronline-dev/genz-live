@@ -33,13 +33,14 @@ export const NAV_CATEGORIES = [
 ] as const;
 
 export const BRAND_ASSETS = {
-  logoLarge:   '/brand/06_Website_Logo_1200x400.png',
-  logoMedium:  '/brand/07_Website_Logo_600x200.png',
-  logoSmall:   '/brand/08_Website_Logo_300x100.png',
-  masterSq:    '/brand/MASTER_SQUARE_2000x2000.png',
+  // New square logo (used everywhere on site)
+  logoLarge:   '/brand/logo_square.png',
+  logoMedium:  '/brand/logo_square.png',
+  logoSmall:   '/brand/logo_square.png',
+  masterSq:    '/brand/logo_square.png',
   ytBanner:    '/brand/02_YouTube_Banner_2560x1440.png',
-  ytProfile:   '/brand/01_YouTube_Profile_800x800.png',
-  igProfile:   '/brand/03_Instagram_Profile_1080x1080.png',
-  fbProfile:   '/brand/04_Facebook_Profile_1080x1080.png',
+  ytProfile:   '/brand/logo_square.png',
+  igProfile:   '/brand/logo_square.png',
+  fbProfile:   '/brand/logo_square.png',
   fbCover:     '/brand/05_Facebook_Cover_1640x856.png',
 } as const;
