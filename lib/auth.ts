@@ -11,6 +11,7 @@ import type { UserRole } from '@prisma/client';
 
 const AUTH_SECRET = process.env.AUTH_SECRET || 'genz-live-secret-key-change-in-production-2026';
 const COOKIE_NAME = 'genz_admin_session';
+const PBKDF2_ITERATIONS = 210000; // OWASP recommended iterations
 
 export interface AdminUserSession {
   id: string;
@@ -19,20 +20,24 @@ export interface AdminUserSession {
   role: UserRole;
 }
 
-/** 1. Hash Password with PBKDF2 */
+/** 1. Hash Password with PBKDF2 (210,000 Iterations) */
 export function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 64, 'sha512').toString('hex');
   return `${salt}:${hash}`;
 }
 
-/** 2. Verify Password */
+/** 2. Timing-Safe Password Verification */
 export function verifyPassword(password: string, storedHash: string): boolean {
   try {
     const [salt, originalHash] = storedHash.split(':');
     if (!salt || !originalHash) return false;
-    const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
-    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(originalHash, 'hex'));
+    const hash = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 64, 'sha512').toString('hex');
+    const hashBuf = Buffer.from(hash, 'hex');
+    const origBuf = Buffer.from(originalHash, 'hex');
+
+    if (hashBuf.length !== origBuf.length) return false;
+    return crypto.timingSafeEqual(hashBuf, origBuf);
   } catch {
     return false;
   }
@@ -46,7 +51,7 @@ function signPayload(payload: string): string {
   return `${payload}.${signature}`;
 }
 
-/** 4. Verify & Parse Signed Token */
+/** 4. Verify & Parse Signed Token with Length Checks */
 function verifyToken(token: string): Record<string, unknown> | null {
   try {
     const lastDotIndex = token.lastIndexOf('.');
@@ -58,7 +63,10 @@ function verifyToken(token: string): Record<string, unknown> | null {
     expectedHmac.update(payload);
     const expectedSignature = expectedHmac.digest('hex');
 
-    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expectedSignature);
+
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
       return null;
     }
 
@@ -96,7 +104,7 @@ export async function getCurrentUser(): Promise<AdminUserSession | null> {
     const parsed = verifyToken(token);
     if (!parsed || !parsed.id) return null;
 
-    // Optional DB verification if DB is enabled
+    // Direct database validation when DB is enabled
     if (process.env.ENABLE_DB_PRISMA === 'true') {
       const dbUser = await prisma.user.findUnique({
         where: { id: parsed.id as string },
