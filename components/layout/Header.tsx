@@ -74,33 +74,18 @@ export default function Header({
           </div>
         </div>
 
-        {/* Single Line Header Row — Logo on Left, 10 Categories in Middle/Right, Actions on Far Right */}
+        {/* Single Line Header Row — Logo on Left, 10 Categories on Right (SAME LINE, NO LINE BREAK) */}
         <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
           {/* Logo on Left */}
           <Logo size="lg" />
 
-          {/* 10 Categories in Desktop View — SAME LINE, NO LINE BREAK */}
-          <div className="hidden lg:flex items-center flex-1 justify-end max-w-4xl mx-2">
+          {/* 10 Categories in Desktop & Laptop View — SAME LINE, NO LINE BREAK */}
+          <div className="hidden md:flex items-center flex-1 justify-end max-w-5xl mx-2 overflow-x-auto no-scrollbar">
             <Navigation activeCategory={activeCategory} onSelect={onCategoryChange ?? (() => {})} />
           </div>
 
           {/* Actions on Far Right */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Desktop Search Toggle */}
-            {onSearchChange && (
-              <div className="relative hidden xl:block w-48">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                <input
-                  id="header-search"
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={e => onSearchChange(e.target.value)}
-                  className="w-full bg-slate-900/90 border border-white/10 rounded-full pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-brand-purple transition-all"
-                />
-              </div>
-            )}
-
             {/* Live Button */}
             {onLiveClick && (
               <button
@@ -134,11 +119,11 @@ export default function Header({
               </button>
             )}
 
-            {/* Mobile Search Toggle */}
+            {/* Search Toggle Button */}
             {onSearchChange && (
               <button
                 onClick={() => setSearchOpen(p => !p)}
-                className="xl:hidden p-2 rounded-full bg-slate-900 border border-white/10 text-slate-300"
+                className="p-2 rounded-full bg-slate-900 border border-white/10 text-slate-300 hover:border-brand-purple/40"
                 aria-label="Toggle search"
               >
                 <Search className="w-4 h-4" />
@@ -149,7 +134,7 @@ export default function Header({
             <button
               id="header-menu-btn"
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 rounded-full bg-slate-900 border border-white/10 text-slate-300"
+              className="md:hidden p-2 rounded-full bg-slate-900 border border-white/10 text-slate-300"
               aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
@@ -157,15 +142,15 @@ export default function Header({
           </div>
         </div>
 
-        {/* Mobile Search Input Dropdown */}
+        {/* Search Input Dropdown */}
         {searchOpen && onSearchChange && (
-          <div className="xl:hidden px-4 py-2 bg-slate-900 border-t border-white/5">
-            <div className="relative">
+          <div className="px-4 py-2 bg-slate-900 border-t border-white/5">
+            <div className="relative max-w-xl mx-auto">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 autoFocus
-                placeholder="Search news..."
+                placeholder="Search news stories..."
                 value={searchQuery}
                 onChange={e => onSearchChange(e.target.value)}
                 className="w-full bg-navy-surface border border-white/10 rounded-full pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-brand-purple"
