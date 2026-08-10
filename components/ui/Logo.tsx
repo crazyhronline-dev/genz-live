@@ -10,30 +10,27 @@ interface LogoProps {
   priority?: boolean;
 }
 
-// Square logo — height drives size, width is auto
-const HEIGHTS = {
-  sm: 48,
-  md: 64,
-  lg: 80,
-  xl: 100,
+const HEIGHT_CLASSES = {
+  sm: 'h-9 md:h-10',
+  md: 'h-11 md:h-12',
+  lg: 'h-12 md:h-14 lg:h-16',
+  xl: 'h-14 md:h-16 lg:h-18',
 } as const;
 
-export default function Logo({ size = 'md', className = '', priority = true }: LogoProps) {
-  const h = HEIGHTS[size];
+export default function Logo({ size = 'lg', className = '', priority = true }: LogoProps) {
+  const heightClass = HEIGHT_CLASSES[size];
 
   return (
     <Link href="/" className={`group flex items-center shrink-0 ${className}`} aria-label={SITE_CONFIG.name}>
       <img
         src={BRAND_ASSETS.logoLarge}
         alt={`${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`}
-        width={h}
-        height={h}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
-        style={{ height: h, width: 'auto' }}
-        className="object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_0_12px_rgba(139,92,246,0.4)]"
+        className={`${heightClass} w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_2px_12px_rgba(139,92,246,0.35)]`}
         onError={(e) => { (e.target as HTMLImageElement).src = BRAND_ASSETS.logoLarge; }}
       />
     </Link>
   );
 }
+

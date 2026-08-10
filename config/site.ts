@@ -33,10 +33,9 @@ export const NAV_CATEGORIES = [
 ] as const;
 
 export const BRAND_ASSETS = {
-  // New square logo (used everywhere on site)
-  logoLarge:   '/brand/logo_square.png',
-  logoMedium:  '/brand/logo_square.png',
-  logoSmall:   '/brand/logo_square.png',
+  logoLarge:   '/brand/06_Website_Logo_1200x400.png',
+  logoMedium:  '/brand/07_Website_Logo_600x200.png',
+  logoSmall:   '/brand/08_Website_Logo_300x100.png',
   masterSq:    '/brand/logo_square.png',
   ytBanner:    '/brand/02_YouTube_Banner_2560x1440.png',
   ytProfile:   '/brand/logo_square.png',
