@@ -1,84 +1,88 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import Navbar from '../src/components/Navbar';
-import BreakingTicker from '../src/components/BreakingTicker';
-import HeroSection from '../src/components/HeroSection';
-import CategoryHub from '../src/components/CategoryHub';
-import YouTubeLiveHub from '../src/components/YouTubeLiveHub';
-import ArticleModal from '../src/components/ArticleModal';
-import Newsletter from '../src/components/Newsletter';
-import Footer from '../src/components/Footer';
-import { ARTICLES, FEATURED_STORIES, YOUTUBE_VIDEOS } from '../src/data/newsData';
+
+// Layout components
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+
+// News components
+import BreakingTicker from '@/components/news/BreakingTicker';
+import HeroSection from '@/components/news/HeroSection';
+import CategoryHub from '@/components/news/CategoryHub';
+
+// Media components
+import YouTubeLiveHub from '@/components/media/YouTubeLiveHub';
+
+// UI components
+import Newsletter from '@/components/ui/Newsletter';
+
+// Article reader (self-contained, includes modal logic)
+import ArticleModal from '@/components/news/ArticleModal';
+
+// Data & types
+import { ARTICLES, FEATURED_STORIES, YOUTUBE_VIDEOS } from '@/lib/newsData';
+import type { Article, BreakingHeadline } from '@/types';
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStory, setSelectedStory] = useState<any>(null);
+  const [selectedStory, setSelectedStory] = useState<Article | null>(null);
   const [savedIds, setSavedIds] = useState<string[]>(['f1', 'a1']);
   const [showLiveStreamModal, setShowLiveStreamModal] = useState(false);
 
-  // Filter articles based on category and search query
-  const filteredArticles = useMemo<any[]>(() => {
-    return ARTICLES.filter((article: any) => {
-      // Category Filter
-      let matchesCategory = true;
-      if (activeCategory === 'saved') {
-        matchesCategory = savedIds.includes(article.id);
-      } else if (activeCategory !== 'all') {
-        matchesCategory = article.category === activeCategory;
-      }
+  const filteredArticles = useMemo<Article[]>(() => {
+    return ARTICLES.filter((article) => {
+      const matchesCategory =
+        activeCategory === 'saved' ? savedIds.includes(article.id) :
+        activeCategory === 'all'   ? true :
+        article.category === activeCategory;
 
-      // Search Query Filter
-      let matchesSearch = true;
-      if (searchQuery.trim() !== '') {
-        const query = searchQuery.toLowerCase();
-        matchesSearch =
-          article.title.toLowerCase().includes(query) ||
-          article.categoryName.toLowerCase().includes(query) ||
-          article.author.toLowerCase().includes(query) ||
-          (Boolean(article.subtitle) && String(article.subtitle).toLowerCase().includes(query));
-      }
+      const matchesSearch = searchQuery.trim() === '' || (() => {
+        const q = searchQuery.toLowerCase();
+        return (
+          article.title.toLowerCase().includes(q) ||
+          article.categoryName.toLowerCase().includes(q) ||
+          article.author.toLowerCase().includes(q) ||
+          Boolean(article.subtitle?.toLowerCase().includes(q))
+        );
+      })();
 
       return matchesCategory && matchesSearch;
     });
   }, [activeCategory, searchQuery, savedIds]);
 
-  // Featured and secondary hero stories
   const featuredStory = FEATURED_STORIES[0];
   const secondaryStories = FEATURED_STORIES.slice(1, 4);
 
-  // Related articles for open modal
-  const relatedArticles = useMemo<any[]>(() => {
+  const relatedArticles = useMemo<Article[]>(() => {
     if (!selectedStory) return [];
-    return ARTICLES.filter((a: any) => a.id !== selectedStory.id && a.category === selectedStory.category);
+    return ARTICLES.filter(a => a.id !== selectedStory.id && a.category === selectedStory.category);
   }, [selectedStory]);
 
   const handleToggleBookmark = (id: string) => {
-    setSavedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    setSavedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
-  const handleSelectHeadline = (headline: any) => {
-    const match = ARTICLES.find((a: any) => a.id === headline.id) || {
+  const handleSelectHeadline = (headline: BreakingHeadline) => {
+    const match = ARTICLES.find(a => a.id === headline.id) ?? {
       id: headline.id,
       title: headline.text,
       categoryName: headline.category,
+      category: headline.category.toLowerCase(),
       publishedAt: headline.time,
       author: 'GenZ Live Desk',
       readTime: '2 min read',
       views: '12.4k',
       likes: 890,
       image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
-      content: `<p class="lead">${headline.text}</p><p>Stay tuned to GenZ Live for continuous live updates on this breaking news story.</p>`
+      content: `<p>${headline.text}</p><p>Stay tuned to GenZ Live for continuous live updates on this breaking news story.</p>`,
     };
     setSelectedStory(match);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-600 selection:text-white">
-      {/* Navigation Header */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
       <Navbar
         activeCategory={activeCategory}
         setActiveCategory={setActiveCategory}
@@ -88,12 +92,9 @@ export default function HomePage() {
         savedCount={savedIds.length}
       />
 
-      {/* Real-time Breaking Ticker */}
       <BreakingTicker onSelectHeadline={handleSelectHeadline} />
 
-      {/* Main Content Area */}
       <main className="flex-1">
-        {/* Spotlight Hero Section (shown when on All Feed and no active search) */}
         {activeCategory === 'all' && !searchQuery && (
           <HeroSection
             featuredStory={featuredStory}
@@ -102,7 +103,6 @@ export default function HomePage() {
           />
         )}
 
-        {/* Category News Grid */}
         <CategoryHub
           articles={filteredArticles}
           activeCategory={activeCategory}
@@ -113,17 +113,13 @@ export default function HomePage() {
           onToggleBookmark={handleToggleBookmark}
         />
 
-        {/* YouTube Channel & Live Media Section */}
         <YouTubeLiveHub />
 
-        {/* Newsletter Subscription */}
         <Newsletter />
       </main>
 
-      {/* Footer */}
       <Footer setActiveCategory={setActiveCategory} />
 
-      {/* Article Reader Modal */}
       {selectedStory && (
         <ArticleModal
           article={selectedStory}
@@ -135,23 +131,16 @@ export default function HomePage() {
         />
       )}
 
-      {/* Live Stream Quick Modal */}
       {showLiveStreamModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-4xl bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl space-y-4 p-4">
+          <div className="w-full max-w-4xl bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-4 space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <span className="live-pulse">LIVE BROADCAST</span>
                 <h3 className="text-sm font-bold text-white">GenZ Live — 24/7 Global Stream</h3>
               </div>
-              <button
-                onClick={() => setShowLiveStreamModal(false)}
-                className="p-1.5 rounded-full bg-slate-800 text-slate-400 hover:text-white"
-              >
-                ✕
-              </button>
+              <button onClick={() => setShowLiveStreamModal(false)} className="p-1.5 rounded-full bg-slate-800 text-slate-400 hover:text-white">✕</button>
             </div>
-
             <div className="aspect-video w-full rounded-xl overflow-hidden bg-black">
               <iframe
                 className="w-full h-full"

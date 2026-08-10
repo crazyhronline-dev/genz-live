@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { ARTICLES } from '@/src/data/newsData';
+import { ARTICLES } from '@/lib/newsData';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category');
-  const query = searchParams.get('query');
+  const query    = searchParams.get('query');
 
   let filtered = ARTICLES;
 
@@ -14,17 +14,12 @@ export async function GET(request: Request) {
 
   if (query) {
     const q = query.toLowerCase();
-    filtered = filtered.filter(
-      a =>
-        a.title.toLowerCase().includes(q) ||
-        a.categoryName.toLowerCase().includes(q) ||
-        a.author.toLowerCase().includes(q)
+    filtered = filtered.filter(a =>
+      a.title.toLowerCase().includes(q) ||
+      a.categoryName.toLowerCase().includes(q) ||
+      a.author.toLowerCase().includes(q)
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    total: filtered.length,
-    articles: filtered,
-  });
+  return NextResponse.json({ success: true, total: filtered.length, articles: filtered });
 }
