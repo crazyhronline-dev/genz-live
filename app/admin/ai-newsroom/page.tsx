@@ -15,6 +15,9 @@ import {
 } from 'lucide-react';
 import { getAiNewsroomMetrics } from '@/lib/aiNewsroomData';
 
+import { getCurrentUser } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+
 export const metadata: Metadata = {
   title: 'AI Newsroom Dashboard — GenZ Live Admin',
   robots: { index: false, follow: false },
@@ -23,8 +26,13 @@ export const metadata: Metadata = {
 export default async function AiNewsroomDashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string; error?: string }>;
+  searchParams: Promise<{ notice?: string; triggerSuccess?: string; success?: string; error?: string }>;
 }) {
+  const user = await getCurrentUser();
+  if (!user) redirect('/admin/login');
+  if (user.role === 'AUTHOR') {
+    redirect('/admin/articles');
+  }
   const { success, error } = await searchParams;
   const metrics = await getAiNewsroomMetrics();
 

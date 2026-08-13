@@ -32,13 +32,13 @@ export default function MobileNavigation({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm lg:hidden"
+        className="fixed inset-0 z-[110] bg-slate-950/70 backdrop-blur-sm lg:hidden"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Drawer */}
-      <div className="fixed inset-y-0 left-0 z-50 w-72 bg-navy-surface border-r border-white/10 flex flex-col lg:hidden overflow-y-auto">
+      <div className="fixed inset-y-0 left-0 z-[120] w-72 bg-navy-surface border-r border-white/10 flex flex-col lg:hidden overflow-y-auto">
         {/* Drawer Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
           <span className="text-sm font-extrabold text-white font-heading">{SITE_CONFIG.name}</span>
@@ -54,30 +54,19 @@ export default function MobileNavigation({
             const Icon = iconMap[cat.icon] ?? Sparkles;
             const isActive = activeCategory === cat.id;
 
-            // If onSelect provided (home page SPA), call it; else navigate
-            if (onSelect) {
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => { onSelect(cat.id); onClose(); }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
-                    isActive
-                      ? 'bg-brand-purple/20 text-brand-purple border border-brand-purple/30'
-                      : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 text-brand-purple shrink-0" />
-                  {cat.name}
-                </button>
-              );
-            }
-
             return (
               <Link
                 key={cat.id}
                 href={getCatHref(cat.id)}
-                onClick={onClose}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800/60 hover:text-white"
+                onClick={() => {
+                  if (onSelect) onSelect(cat.id);
+                  onClose();
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  isActive
+                    ? 'bg-brand-purple/20 text-brand-purple border border-brand-purple/30'
+                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                }`}
               >
                 <Icon className="w-4 h-4 text-brand-purple shrink-0" />
                 {cat.name}

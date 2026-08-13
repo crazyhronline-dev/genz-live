@@ -3,6 +3,7 @@ import { Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
 import { loginAction } from '@/app/admin/actions';
 import { getCurrentUser } from '@/lib/auth';
+import { getBrandSettings } from '@/lib/brandSettings';
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
   }
 
   const { error } = await searchParams;
+  const brand = await getBrandSettings();
 
   return (
     <div className="min-h-screen bg-navy-main text-slate-100 flex items-center justify-center p-4 selection:bg-purple-600 selection:text-white">
@@ -24,7 +26,12 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <div className="inline-block mb-2">
-            <Logo size="lg" />
+            <Logo
+              size="lg"
+              src={brand.adminLogoUrl}
+              customHeight={brand.adminLogoHeight}
+              customWidth={brand.adminLogoWidth}
+            />
           </div>
           <h1 className="text-2xl font-extrabold text-white font-heading">Editorial Newsroom CMS</h1>
           <p className="text-slate-400 text-xs flex items-center justify-center gap-1">
@@ -52,8 +59,8 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
                   name="email"
                   type="email"
                   required
-                  placeholder="admin@genz-live.com"
-                  defaultValue="admin@genz-live.com"
+                  placeholder="wilson@genz-live.com"
+                  defaultValue="wilson@genz-live.com"
                   className="w-full bg-slate-900 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-all"
                 />
               </div>

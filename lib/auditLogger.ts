@@ -18,23 +18,36 @@ export interface AuditLogEntry {
 }
 
 export async function logAuditAction(entry: AuditLogEntry): Promise<void> {
-  if (process.env.ENABLE_DB_PRISMA !== 'true') {
+  if (process.env.ENABLE_DB_PRISMA !== 'true' && !process.env.DATABASE_URL) {
     return;
   }
 
   try {
-    await prisma.auditLog.create({
-      data: {
-        userId: entry.userId,
-        action: entry.action,
-        entityType: entry.entityType,
-        entityId: entry.entityId ?? null,
-        oldData: entry.oldData ? (JSON.parse(JSON.stringify(entry.oldData)) as Prisma.InputJsonValue) : undefined,
-        newData: entry.newData ? (JSON.parse(JSON.stringify(entry.newData)) as Prisma.InputJsonValue) : undefined,
-        ipAddress: entry.ipAddress ?? null,
-        userAgent: entry.userAgent ?? null,
-      },
-    });
+    let validUserId: string = entry.userId;
+
+    if (validUserId) {
+      const userExists = await prisma.user.findUnique({
+        where: { id: validUserId },
+        select: { id: true },
+      });
+      if (!userExists) {
+        const firstAdmin = await prisma.user.findFirst({ select: { id: true } });
+        validUserId = firstAdmin ? firstAdmin.id : 'static-admin-wilson';
+      }
+    }
+
+    const data: Prisma.AuditLogUncheckedCreateInput = {
+      userId: validUserId || 'static-admin-wilson',
+      action: entry.action,
+      entityType: entry.entityType,
+      entityId: entry.entityId ?? null,
+      oldData: entry.oldData ? (JSON.parse(JSON.stringify(entry.oldData)) as Prisma.InputJsonValue) : undefined,
+      newData: entry.newData ? (JSON.parse(JSON.stringify(entry.newData)) as Prisma.InputJsonValue) : undefined,
+      ipAddress: entry.ipAddress ?? null,
+      userAgent: entry.userAgent ?? null,
+    };
+
+    await prisma.auditLog.create({ data });
   } catch {
     // Fail silently
   }

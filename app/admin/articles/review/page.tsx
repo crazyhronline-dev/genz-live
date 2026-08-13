@@ -13,6 +13,9 @@ export const metadata: Metadata = {
 export default async function AdminReviewQueuePage() {
   const user = await getCurrentUser();
   if (!user) redirect('/admin/login');
+  if (user.role === 'AUTHOR') {
+    redirect('/admin/articles');
+  }
 
   const data = await getCmsArticles({ status: 'REVIEW' });
 

@@ -10,6 +10,9 @@ export const metadata: Metadata = {
 export default async function AdminAuditLogsPage() {
   const user = await getCurrentUser();
   if (!user) redirect('/admin/login');
+  if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    redirect('/admin');
+  }
 
   const logs = await getCmsAuditLogs(50);
 

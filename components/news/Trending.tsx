@@ -32,7 +32,7 @@ export default function Trending({
       {/* Article List */}
       <ol className="space-y-3">
         {displayed.map((article, idx) => {
-          const href = `/${article.category}/${article.id}`;
+          const href = `/${article.category}/${article.slug || article.id}`;
           const rank = idx + 1;
 
           const content = (

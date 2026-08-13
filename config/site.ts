@@ -5,7 +5,7 @@ export const SITE_CONFIG = {
   tagline: 'The Voice of GenZ',
   domain: 'https://genz-live.com',
   description:
-    'GenZ Live is a global digital news and media platform covering World, India, Technology, AI, Business, Markets, Entertainment, Sports, Culture and Trending news.',
+    'GenZ Live — The Voice of GenZ. Global digital news platform for digital natives and the next generation. Real-time breaking news, live updates, and in-depth coverage across World, India, Technology, AI, Business, Markets, Entertainment, Sports, Culture, and Gen Z trends.',
   youtube: {
     channel: 'GenZ Live',
     handle: '@genz-live-official',

@@ -86,11 +86,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         {/* RSS Auto-discovery */}
         <link rel="alternate" type="application/rss+xml" title={`${SITE_CONFIG.name} RSS Feed`} href={`${SITE_CONFIG.domain}/rss.xml`} />
-        {/* DNS Prefetch for external resources */}
+        {/* DNS Prefetch & Preconnect for external resources */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//www.youtube.com" />
         <link rel="dns-prefetch" href="//i.ytimg.com" />
+        <link rel="dns-prefetch" href="//images.unsplash.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://i.ytimg.com" crossOrigin="anonymous" />
         {/* Theme color for browsers */}
         <meta name="theme-color" content="#0a0f1e" />
         <meta name="color-scheme" content="dark" />

@@ -8,7 +8,37 @@ import prisma from '@/lib/prisma';
 import type { Article, BreakingHeadline } from '@/types';
 import { ARTICLES, FEATURED_STORIES, BREAKING_HEADLINES } from '@/lib/newsData';
 
-const isDbEnabled = process.env.ENABLE_DB_PRISMA === 'true';
+const isDbEnabled = process.env.ENABLE_DB_PRISMA === 'true' || Boolean(process.env.DATABASE_URL);
+
+
+/** Helper: Category-specific high-resolution fallback image (Optimized 800px WebP) */
+export function getCategoryFallbackImage(categorySlug?: string, title?: string): string {
+  const cat = (categorySlug || '').toLowerCase();
+  const t = (title || '').toLowerCase();
+
+  if (cat.includes('ai') || t.includes('ai') || t.includes('intelligence') || t.includes('robot')) {
+    return 'https://images.unsplash.com/photo-1677442136019-21780efad99a?w=800&auto=format&fit=crop&q=65';
+  }
+  if (cat.includes('tech') || t.includes('tech') || t.includes('software') || t.includes('code') || t.includes('app')) {
+    return 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=65';
+  }
+  if (cat.includes('india') || t.includes('india') || t.includes('ranchi') || t.includes('delhi') || t.includes('mumbai')) {
+    return 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&auto=format&fit=crop&q=65';
+  }
+  if (cat.includes('sport') || t.includes('cricket') || t.includes('sport') || t.includes('match') || t.includes('ipl')) {
+    return 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&auto=format&fit=crop&q=65';
+  }
+  if (cat.includes('market') || cat.includes('business') || t.includes('stock') || t.includes('crypto') || t.includes('finance')) {
+    return 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=65';
+  }
+  if (cat.includes('world') || t.includes('global') || t.includes('world') || t.includes('summit')) {
+    return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=65';
+  }
+  if (cat.includes('entertainment') || cat.includes('culture') || t.includes('movie') || t.includes('music')) {
+    return 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=65';
+  }
+  return 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&auto=format&fit=crop&q=65';
+}
 
 /** Helper: Label fallback data cleanly as [DEMO CONTENT] */
 function withDemoLabel(article: Article): Article {
@@ -19,18 +49,64 @@ function withDemoLabel(article: Article): Article {
   };
 }
 
+/** Helper: determine if this is a renderable image URL or extract video thumbnail */
+export function resolveArticleImage(url?: string | null, catSlug?: string, title?: string): string {
+  let u = (url || '').trim();
+  if (!u || u.length < 5) return getCategoryFallbackImage(catSlug, title);
+
+  // Data URLs, dynamic upload paths, and standard relative URLs
+  if (u.startsWith('data:image/') || u.startsWith('/')) return u;
+
+  // YouTube watch/embed URL → extract thumbnail
+  const ytMatch = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  if (ytMatch && ytMatch[1]) return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+
+  // newspinch.in/video/VIDEO_ID → extract YouTube thumbnail
+  const nsMatch = u.match(/newspinch\.in\/video\/([a-zA-Z0-9_-]+)/);
+  if (nsMatch && nsMatch[1]) return `https://img.youtube.com/vi/${nsMatch[1]}/hqdefault.jpg`;
+
+  // Optimize Unsplash images dynamically
+  if (u.includes('images.unsplash.com')) {
+    u = u.replace(/w=\d+/, 'w=800').replace(/q=\d+/, 'q=65');
+    if (!u.includes('w=800')) {
+      u += u.includes('?') ? '&w=800&auto=format&fit=crop&q=65' : '?w=800&auto=format&fit=crop&q=65';
+    }
+  }
+
+  // If it's a standard web URL (http/https), pass it directly so custom CDN URLs work
+  if (u.startsWith('http://') || u.startsWith('https://')) {
+    return u;
+  }
+
+  return getCategoryFallbackImage(catSlug, title);
+}
+
 /** 1. Fetch Single Published Article by Category and Slug */
 export async function getPublishedArticle(categorySlug: string, articleSlug: string): Promise<Article | null> {
-  const now = new Date();
+  // Add 30-minute future buffer to prevent server/DB clock-skew from hiding newly published articles
+  const now = new Date(Date.now() + 30 * 60 * 1000);
 
   if (isDbEnabled) {
     try {
-      const article = await prisma.article.findFirst({
+      // Search by slug OR id, status = PUBLISHED, publishedAt <= now
+      let article = await prisma.article.findFirst({
         where: {
-          slug: articleSlug,
-          category: { slug: categorySlug },
-          status: 'PUBLISHED',
-          publishedAt: { lte: now },
+          AND: [
+            {
+              OR: [
+                { slug: articleSlug },
+                { id: articleSlug },
+              ],
+            },
+            { status: 'PUBLISHED' },
+            {
+              // Accept articles where publishedAt <= now OR publishedAt is null (published immediately)
+              OR: [
+                { publishedAt: { lte: now } },
+                { publishedAt: null },
+              ],
+            },
+          ],
         },
         include: {
           category: true,
@@ -40,7 +116,40 @@ export async function getPublishedArticle(categorySlug: string, articleSlug: str
         },
       });
 
+      // If not found, try case-insensitive or decoded slug
+      if (!article) {
+        const cleanSlug = decodeURIComponent(articleSlug).toLowerCase().trim();
+        article = await prisma.article.findFirst({
+        where: {
+            AND: [
+              {
+                OR: [
+                  { slug: cleanSlug },
+                  { slug: { contains: cleanSlug } },
+                ],
+              },
+              { status: 'PUBLISHED' },
+              {
+                // Accept articles where publishedAt <= now OR publishedAt is null
+                OR: [
+                  { publishedAt: { lte: now } },
+                  { publishedAt: null },
+                ],
+              },
+            ],
+          },
+          include: {
+            category: true,
+            author: true,
+            source: true,
+            tags: { include: { tag: true } },
+          },
+        });
+      }
+
       if (article) {
+        const image = resolveArticleImage(article.featuredImage, article.category.slug, article.title);
+
         return {
           id: article.id,
           slug: article.slug,
@@ -59,10 +168,11 @@ export async function getPublishedArticle(categorySlug: string, articleSlug: str
           readTime: article.readTime ?? '4 min read',
           views: `${article.views}`,
           likes: article.likes,
-          image: article.featuredImage ?? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80',
+          image,
           isFeatured: article.isFeatured,
           seoTitle: article.seoTitle ?? article.metaTitle ?? article.title,
           seoDescription: article.seoDescription ?? article.metaDescription ?? article.excerpt ?? undefined,
+          keywords: article.keywords ? article.keywords.split(',').map(k => k.trim()).filter(Boolean) : [],
           canonicalUrl: article.canonicalUrl ?? undefined,
           youtubeUrl: article.youtubeUrl ?? undefined,
           source: article.source ? { name: article.source.name, url: article.source.url ?? undefined } : undefined,
@@ -86,7 +196,8 @@ export async function getPublishedArticle(categorySlug: string, articleSlug: str
 
 /** 2. Fetch Latest Published Articles */
 export async function getLatestArticles(limit: number = 9): Promise<Article[]> {
-  const now = new Date();
+  const now = new Date(Date.now() + 5 * 60 * 1000);
+  let dbResult: Article[] = [];
 
   if (isDbEnabled) {
     try {
@@ -101,7 +212,7 @@ export async function getLatestArticles(limit: number = 9): Promise<Article[]> {
       });
 
       if (dbArticles.length > 0) {
-        return dbArticles.map(a => ({
+        dbResult = dbArticles.map(a => ({
           id: a.id,
           slug: a.slug,
           title: a.title,
@@ -118,7 +229,7 @@ export async function getLatestArticles(limit: number = 9): Promise<Article[]> {
           readTime: a.readTime ?? '3 min read',
           views: `${a.views}`,
           likes: a.likes,
-          image: a.featuredImage ?? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
+          image: resolveArticleImage(a.featuredImage, a.category.slug, a.title),
           content: a.content,
         }));
       }
@@ -127,28 +238,35 @@ export async function getLatestArticles(limit: number = 9): Promise<Article[]> {
     }
   }
 
-  return ARTICLES.slice(0, limit).map(withDemoLabel);
+  if (dbResult.length >= limit) return dbResult;
+
+  // Auto-pad missing slots with clean demo articles so the page is always full & rich
+  const existingSlugs = new Set(dbResult.map(a => a.slug));
+  const fallbackList = ARTICLES.filter(a => !existingSlugs.has(a.slug)).map(withDemoLabel);
+  const needed = limit - dbResult.length;
+
+  return [...dbResult, ...fallbackList.slice(0, needed)];
 }
 
-/** 3. Fetch Featured Hero Articles */
+/** 3. Fetch Featured Hero Articles (Hybrid Auto-Padded) */
 export async function getFeaturedArticles(): Promise<{ featuredStory: Article; secondaryStories: Article[] }> {
-  const now = new Date();
+  const now = new Date(Date.now() + 5 * 60 * 1000);
+  let dbMapped: Article[] = [];
 
   if (isDbEnabled) {
     try {
       const dbFeatured = await prisma.article.findMany({
         where: {
           status: 'PUBLISHED',
-          isFeatured: true,
           publishedAt: { lte: now },
         },
         include: { category: true, author: true },
-        orderBy: { publishedAt: 'desc' },
+        orderBy: [{ isFeatured: 'desc' }, { publishedAt: 'desc' }],
         take: 4,
       });
 
       if (dbFeatured.length > 0) {
-        const mapped: Article[] = dbFeatured.map(a => ({
+        dbMapped = dbFeatured.map(a => ({
           id: a.id,
           slug: a.slug,
           title: a.title,
@@ -162,30 +280,34 @@ export async function getFeaturedArticles(): Promise<{ featuredStory: Article; s
           readTime: a.readTime ?? '4 min read',
           views: `${a.views}`,
           likes: a.likes,
-          image: a.featuredImage ?? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80',
+          image: resolveArticleImage(a.featuredImage, a.category.slug, a.title),
           content: a.content,
           isFeatured: a.isFeatured,
         }));
-
-        return {
-          featuredStory: mapped[0],
-          secondaryStories: mapped.slice(1),
-        };
       }
     } catch {
       // Fallback
     }
   }
 
+  const featuredStory = dbMapped.length > 0 ? dbMapped[0] : withDemoLabel(FEATURED_STORIES[0]);
+  const realSecondary = dbMapped.slice(1);
+  const existingSlugs = new Set([featuredStory.slug, ...realSecondary.map(s => s.slug)]);
+  const fallbackSecondary = FEATURED_STORIES.filter(s => !existingSlugs.has(s.slug)).map(withDemoLabel);
+
+  const neededSecondary = 3 - realSecondary.length;
+  const secondaryStories = [...realSecondary, ...fallbackSecondary.slice(0, Math.max(0, neededSecondary))];
+
   return {
-    featuredStory: withDemoLabel(FEATURED_STORIES[0]),
-    secondaryStories: FEATURED_STORIES.slice(1).map(withDemoLabel),
+    featuredStory,
+    secondaryStories,
   };
 }
 
-/** 4. Fetch Category Articles */
+/** 4. Fetch Category Articles (Hybrid Auto-Padded) */
 export async function getCategoryArticles(categorySlug: string, limit: number = 6): Promise<Article[]> {
-  const now = new Date();
+  const now = new Date(Date.now() + 5 * 60 * 1000);
+  let dbResult: Article[] = [];
 
   if (isDbEnabled) {
     try {
@@ -201,7 +323,7 @@ export async function getCategoryArticles(categorySlug: string, limit: number = 
       });
 
       if (dbArticles.length > 0) {
-        return dbArticles.map(a => ({
+        dbResult = dbArticles.map(a => ({
           id: a.id,
           slug: a.slug,
           title: a.title,
@@ -215,7 +337,7 @@ export async function getCategoryArticles(categorySlug: string, limit: number = 
           readTime: a.readTime ?? '4 min read',
           views: `${a.views}`,
           likes: a.likes,
-          image: a.featuredImage ?? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
+          image: resolveArticleImage(a.featuredImage, a.category.slug, a.title),
           content: a.content,
         }));
       }
@@ -224,13 +346,19 @@ export async function getCategoryArticles(categorySlug: string, limit: number = 
     }
   }
 
-  const matches = ARTICLES.filter(a => a.category === categorySlug || categorySlug === 'all');
-  return matches.slice(0, limit).map(withDemoLabel);
+  if (dbResult.length >= limit) return dbResult;
+
+  const existingSlugs = new Set(dbResult.map(a => a.slug));
+  const categoryMatches = ARTICLES.filter(a => (a.category === categorySlug || categorySlug === 'all') && !existingSlugs.has(a.slug)).map(withDemoLabel);
+  const needed = limit - dbResult.length;
+
+  return [...dbResult, ...categoryMatches.slice(0, needed)];
 }
 
-/** 5. Fetch Trending Articles */
+/** 5. Fetch Trending Articles (Hybrid Auto-Padded) */
 export async function getTrendingArticles(limit: number = 5): Promise<Article[]> {
-  const now = new Date();
+  const now = new Date(Date.now() + 5 * 60 * 1000);
+  let dbResult: Article[] = [];
 
   if (isDbEnabled) {
     try {
@@ -245,7 +373,7 @@ export async function getTrendingArticles(limit: number = 5): Promise<Article[]>
       });
 
       if (dbTrending.length > 0) {
-        return dbTrending.map(a => ({
+        dbResult = dbTrending.map(a => ({
           id: a.id,
           slug: a.slug,
           title: a.title,
@@ -256,7 +384,7 @@ export async function getTrendingArticles(limit: number = 5): Promise<Article[]>
           readTime: a.readTime ?? '3 min read',
           views: `${a.views}`,
           likes: a.likes,
-          image: a.featuredImage ?? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+          image: resolveArticleImage(a.featuredImage, a.category.slug, a.title),
           content: a.content,
         }));
       }
@@ -265,7 +393,13 @@ export async function getTrendingArticles(limit: number = 5): Promise<Article[]>
     }
   }
 
-  return ARTICLES.slice(0, limit).map(withDemoLabel);
+  if (dbResult.length >= limit) return dbResult;
+
+  const existingSlugs = new Set(dbResult.map(a => a.slug));
+  const fallbackList = ARTICLES.filter(a => !existingSlugs.has(a.slug)).map(withDemoLabel);
+  const needed = limit - dbResult.length;
+
+  return [...dbResult, ...fallbackList.slice(0, needed)];
 }
 
 /** 6. Fetch Active Breaking News */
@@ -330,7 +464,7 @@ export async function getRelatedArticles(currentId: string, categorySlug: string
           readTime: a.readTime ?? '3 min read',
           views: `${a.views}`,
           likes: a.likes,
-          image: a.featuredImage ?? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+          image: resolveArticleImage(a.featuredImage, a.category.slug, a.title),
           content: a.content,
         }));
       }
@@ -371,7 +505,7 @@ export async function getArticlesByTag(tagSlug: string, limit: number = 10): Pro
           readTime: t.article.readTime ?? '3 min read',
           views: `${t.article.views}`,
           likes: t.article.likes,
-          image: t.article.featuredImage ?? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+          image: resolveArticleImage(t.article.featuredImage, t.article.category.slug, t.article.title),
           content: t.article.content,
         }));
       }
@@ -412,7 +546,7 @@ export async function getArticlesByAuthor(authorSlug: string, limit: number = 10
           readTime: a.readTime ?? '3 min read',
           views: `${a.views}`,
           likes: a.likes,
-          image: a.featuredImage ?? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+          image: resolveArticleImage(a.featuredImage, a.category.slug, a.title),
           content: a.content,
         }));
       }
@@ -458,7 +592,7 @@ export async function searchPublishedArticles(query: string, categorySlug?: stri
           readTime: a.readTime ?? '3 min read',
           views: `${a.views}`,
           likes: a.likes,
-          image: a.featuredImage ?? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+          image: resolveArticleImage(a.featuredImage, a.category.slug, a.title),
           content: a.content,
         }));
       }

@@ -36,6 +36,7 @@ export interface Article {
   isDemo?: boolean;
   seoTitle?: string;
   seoDescription?: string;
+  keywords?: string[];
   canonicalUrl?: string;
   youtubeUrl?: string;
   source?: ArticleSourceItem;
@@ -54,6 +55,8 @@ export interface BreakingHeadline {
   text: string;
   category: string;
   time: string;
+  slug?: string;
+  url?: string;
 }
 
 export interface YouTubeVideo {

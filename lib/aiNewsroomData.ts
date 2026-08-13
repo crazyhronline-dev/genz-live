@@ -9,7 +9,8 @@ import { fetchAndParseFeed } from '@/lib/ingestion/rssFetcher';
 import { calculateTitleSimilarity } from '@/lib/ingestion/deduplicator';
 import { getAIProvider, type AIAnalysisResult, type AIDraftResult } from '@/lib/ai/provider';
 
-const isDbEnabled = process.env.ENABLE_DB_PRISMA === 'true';
+const isDbEnabled = process.env.ENABLE_DB_PRISMA === 'true' || Boolean(process.env.DATABASE_URL);
+
 
 // ----------------------------------------------------------------
 // 1. AI NEWSROOM DASHBOARD METRICS

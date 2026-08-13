@@ -22,10 +22,11 @@ export default function robots(): MetadataRoute.Robots {
           '/preview/',
         ],
       },
-      // Block known AI training scrapers
+      // Allow AI search and discovery crawlers on public routes
       {
-        userAgent: ['GPTBot', 'ChatGPT-User', 'CCBot', 'anthropic-ai', 'Claude-Web', 'PerplexityBot'],
-        disallow: '/',
+        userAgent: ['GPTBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-Web', 'PerplexityBot'],
+        allow: '/',
+        disallow: ['/admin', '/admin/', '/api/', '/_next/', '/preview/'],
       },
       // Allow Google Image Bot full access
       {

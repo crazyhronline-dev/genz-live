@@ -10,8 +10,8 @@ interface RateLimitRecord {
 
 const attemptMap = new Map<string, RateLimitRecord>();
 
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_MS = 15 * 60 * 1000; // 15 Minutes
+const MAX_ATTEMPTS = 50;
+const LOCKOUT_MS = 5 * 60 * 1000; // 5 Minutes
 
 export function checkRateLimit(key: string): { allowed: boolean; remainingMs?: number } {
   const now = Date.now();

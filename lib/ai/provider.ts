@@ -47,6 +47,7 @@ export interface AIProvider {
   generateDraft(title: string, description?: string, category?: string): Promise<AIDraftResult>;
   suggestHeadlines(title: string, description?: string): Promise<string[]>;
   generateSEO(title: string, content: string): Promise<{ seoTitle: string; seoDescription: string }>;
+  suggestKeywords(title: string, description?: string, content?: string): Promise<string[]>;
 }
 
 // ----------------------------------------------------------------
@@ -159,6 +160,47 @@ class MockAIProvider implements AIProvider {
       seoTitle: `${cleanT} | GenZ Live`,
       seoDescription: cleanC.slice(0, 155),
     };
+  }
+
+  async suggestKeywords(title: string, description: string = '', content: string = ''): Promise<string[]> {
+    const cleanTitle = stripHtml(title);
+    const cleanDesc = stripHtml(description);
+    const cleanContent = stripHtml(content);
+    const combined = `${cleanTitle} ${cleanDesc} ${cleanContent}`.trim();
+
+    const words = combined
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 3 && !['with', 'from', 'that', 'this', 'have', 'were', 'their', 'there', 'about', 'would', 'could', 'should', 'more'].includes(w));
+
+    const freq: Record<string, number> = {};
+    for (const w of words) {
+      freq[w] = (freq[w] || 0) + 1;
+    }
+
+    const topWords = Object.keys(freq)
+      .sort((a, b) => freq[b] - freq[a])
+      .slice(0, 6);
+
+    const year = new Date().getFullYear();
+    const suggested: string[] = [];
+
+    if (cleanTitle) {
+      suggested.push(cleanTitle.slice(0, 45).trim());
+      suggested.push(`${cleanTitle.slice(0, 30).trim()} ${year}`);
+      suggested.push(`${cleanTitle.slice(0, 35).trim()} latest updates`);
+      suggested.push(`${cleanTitle.slice(0, 35).trim()} news`);
+    }
+
+    for (const tw of topWords) {
+      const cap = tw.charAt(0).toUpperCase() + tw.slice(1);
+      suggested.push(`${cap} latest news`);
+      suggested.push(`${cap} ${year} updates`);
+      suggested.push(`${cap} key facts`);
+    }
+
+    return Array.from(new Set(suggested)).slice(0, 12);
   }
 }
 
@@ -295,6 +337,51 @@ title (string), subtitle (string), excerpt (string), content (clean HTML string 
       seoTitle: `${cleanT} | GenZ Live`,
       seoDescription: cleanC.slice(0, 155),
     };
+  }
+
+  async suggestKeywords(title: string, description: string = '', content: string = ''): Promise<string[]> {
+    const prompt = `You are a Search Engine Optimization (SEO) & SERP Ranking Specialist for GenZ Live digital news.
+Analyze the following news story headline, description, and body content thoroughly:
+
+TITLE: ${title}
+DESCRIPTION: ${description}
+CONTENT BODY: ${content.slice(0, 1500)}
+
+INSTRUCTION: Analyze entity relationships, primary search intent, trending news queries, LSI (Latent Semantic Indexing) keywords, and long-tail SERP search phrases.
+Suggest 8 to 14 high-ranking, real SERP keywords that will rank this article at the top of Google Search and Google News.
+Return JSON object: { "keywords": ["keyword 1", "keyword 2", ...] }`;
+
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages: [{ role: 'user', content: prompt }],
+          response_format: { type: 'json_object' },
+          temperature: 0.3,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content;
+        if (text) {
+          const parsed = JSON.parse(text);
+          if (Array.isArray(parsed.keywords) && parsed.keywords.length > 0) {
+            return parsed.keywords;
+          }
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    const fallback = new MockAIProvider();
+    return fallback.suggestKeywords(title, description, content);
   }
 }
 

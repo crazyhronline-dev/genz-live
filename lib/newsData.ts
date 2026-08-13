@@ -5,11 +5,11 @@
 import type { Article, BreakingHeadline, YouTubeVideo } from '@/types';
 
 export const BREAKING_HEADLINES: BreakingHeadline[] = [
-  { id: 'b1', text: '🚨 OpenAI & Anthropic Announce Next-Gen Autonomous AI Agents', category: 'AI', time: '2m ago' },
-  { id: 'b2', text: '⚡ India Tech Summit 2026: GenZ Founders Secure $1.2B in Funding', category: 'India', time: '5m ago' },
-  { id: 'b3', text: '📈 Global Crypto & Digital Asset Markets Reach Record High Volume', category: 'Markets', time: '12m ago' },
-  { id: 'b4', text: '🎬 Streaming Revolution: Independent Creators Take 45% Viewership Share', category: 'Entertainment', time: '18m ago' },
-  { id: 'b5', text: '🌍 Global Youth Climate Summit Begins with 190 Country Delegates', category: 'World', time: '25m ago' },
+  { id: 'b1', text: '🚨 OpenAI & Anthropic Announce Next-Gen Autonomous AI Agents', category: 'ai', slug: 'f1', time: '2m ago' },
+  { id: 'b2', text: '⚡ India Tech Summit 2026: GenZ Founders Secure $1.2B in Funding', category: 'india', slug: 'f2', time: '5m ago' },
+  { id: 'b3', text: '📈 Global Crypto & Digital Asset Markets Reach Record High Volume', category: 'markets', slug: 'm1', time: '12m ago' },
+  { id: 'b4', text: '🎬 Streaming Revolution: Independent Creators Take 45% Viewership Share', category: 'entertainment', slug: 'e1', time: '18m ago' },
+  { id: 'b5', text: '🌍 Global Youth Climate Summit Begins with 190 Country Delegates', category: 'world', slug: 'w1', time: '25m ago' },
 ];
 
 export const FEATURED_STORIES: Article[] = [

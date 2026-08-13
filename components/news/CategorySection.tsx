@@ -37,7 +37,7 @@ export default function CategorySection({
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 bg-gradient-to-b from-brand-purple to-brand-cyan rounded-full" />
-          <h2 className="text-lg md:text-xl font-extrabold text-white font-heading">{title}</h2>
+          <h2 className="text-lg md:text-xl font-extrabold text-white font-heading" aria-label={`${title} section`}>{title}</h2>
         </div>
         {viewAllHref && (
           <Link

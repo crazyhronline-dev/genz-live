@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Bookmark, Clock, Eye, ArrowRight, Play, TrendingUp } from 'lucide-react';
 import type { Article, YouTubeVideo } from '@/types';
+import { resolveArticleImage } from '@/lib/dataAccess';
 
 export interface ArticleCardProps {
   article: Article;
@@ -34,13 +35,14 @@ export default function ArticleCard({
     return <LargeArticleCard article={article} onSelect={onSelect} isSaved={isSaved} onToggleBookmark={onToggleBookmark} />;
   }
 
-  const href = `/${article.category}/${article.id}`;
-  const handleClick = (e: React.MouseEvent) => {
+  const href = `/${article.category}/${article.slug || article.id}`;
+  const handleClick = () => {
     if (onSelect) {
-      e.preventDefault();
       onSelect(article);
     }
   };
+
+  const imgSrc = resolveArticleImage(article.image, article.category, article.title);
 
   // Default: Grid Card
   return (
@@ -48,14 +50,14 @@ export default function ArticleCard({
       {/* Thumbnail */}
       <Link href={href} onClick={handleClick} className="relative h-48 overflow-hidden cursor-pointer block">
         <Image
-          src={article.image}
+          src={imgSrc}
           alt={article.title}
           fill
           loading="lazy"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-30" />
 
         {/* Top overlay */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
@@ -106,7 +108,7 @@ export default function ArticleCard({
 
 /** 1. LargeArticleCard — Prominent card with subtitle & large thumbnail */
 export function LargeArticleCard({ article, onSelect }: ArticleCardProps) {
-  const href = `/${article.category}/${article.id}`;
+  const href = `/${article.category}/${article.slug || article.id}`;
   const handleClick = (e: React.MouseEvent) => {
     if (onSelect) {
       e.preventDefault();
@@ -114,11 +116,13 @@ export function LargeArticleCard({ article, onSelect }: ArticleCardProps) {
     }
   };
 
+  const imgSrc = resolveArticleImage(article.image, article.category, article.title);
+
   return (
     <article className="glass-panel group overflow-hidden border border-white/10 hover:border-brand-purple/40 transition-all duration-300 flex flex-col md:flex-row gap-6 p-6">
       <Link href={href} onClick={handleClick} className="relative md:w-1/2 h-64 md:h-auto rounded-xl overflow-hidden cursor-pointer shrink-0 block">
         <Image
-          src={article.image}
+          src={imgSrc}
           alt={article.title}
           fill
           loading="lazy"
@@ -153,13 +157,14 @@ export function LargeArticleCard({ article, onSelect }: ArticleCardProps) {
 
 /** 2. MediumArticleCard — Row layout card */
 export function MediumArticleCard({ article, onSelect }: ArticleCardProps) {
-  const href = `/${article.category}/${article.id}`;
-  const handleClick = (e: React.MouseEvent) => {
+  const href = `/${article.category}/${article.slug || article.id}`;
+  const handleClick = () => {
     if (onSelect) {
-      e.preventDefault();
       onSelect(article);
     }
   };
+
+  const imgSrc = resolveArticleImage(article.image, article.category, article.title);
 
   return (
     <Link
@@ -169,7 +174,7 @@ export function MediumArticleCard({ article, onSelect }: ArticleCardProps) {
     >
       <div className="relative w-24 h-24 shrink-0">
         <Image
-          src={article.image}
+          src={imgSrc}
           alt={article.title}
           fill
           loading="lazy"
@@ -193,13 +198,14 @@ export function MediumArticleCard({ article, onSelect }: ArticleCardProps) {
 
 /** 3. SmallArticleCard / CompactArticleCard — Compact thumbnail + headline button */
 export function SmallArticleCard({ article, onSelect }: ArticleCardProps) {
-  const href = `/${article.category}/${article.id}`;
-  const handleClick = (e: React.MouseEvent) => {
+  const href = `/${article.category}/${article.slug || article.id}`;
+  const handleClick = () => {
     if (onSelect) {
-      e.preventDefault();
       onSelect(article);
     }
   };
+
+  const imgSrc = resolveArticleImage(article.image, article.category, article.title);
 
   return (
     <Link
@@ -209,7 +215,7 @@ export function SmallArticleCard({ article, onSelect }: ArticleCardProps) {
     >
       <div className="relative w-14 h-14 shrink-0">
         <Image
-          src={article.image}
+          src={imgSrc}
           alt={article.title}
           fill
           loading="lazy"
@@ -230,10 +236,9 @@ export const CompactArticleCard = SmallArticleCard;
 
 /** 4. TrendingCard — Numbered rank card (01, 02, etc.) */
 export function TrendingCard({ article, rank, onSelect }: { article: Article; rank: number; onSelect?: (article: Article) => void }) {
-  const href = `/${article.category}/${article.id}`;
-  const handleClick = (e: React.MouseEvent) => {
+  const href = `/${article.category}/${article.slug || article.id}`;
+  const handleClick = () => {
     if (onSelect) {
-      e.preventDefault();
       onSelect(article);
     }
   };

@@ -293,6 +293,7 @@ export function buildArticleMetadata(opts?: {
   description?: string;
   category?: string;
   catSlug?: string;
+  keywords?: string[];
   publishedTime?: string;
   modifiedTime?: string;
   author?: string;
@@ -312,6 +313,7 @@ export function buildArticleMetadata(opts?: {
   return buildPageMetadata({
     title: opts.title,
     description: opts.description ?? DESCRIPTION,
+    keywords: opts.keywords ?? [],
     ogImage: opts.image ?? OG_IMAGE_URL,
     ogType: 'article',
     canonicalPath: opts.slug ? `/${catSlug}/${opts.slug}` : undefined,
@@ -320,6 +322,7 @@ export function buildArticleMetadata(opts?: {
       modifiedTime: opts.modifiedTime,
       authors: opts.author ? [opts.author] : [SITE_NAME],
       section: opts.category,
+      tags: opts.keywords,
     },
   });
 }

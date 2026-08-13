@@ -1,22 +1,12 @@
-// app/search/layout.tsx
-// Search results pages must be noindex to prevent internal search
-// result pages from polluting Google's index (per Phase 5 spec)
-
 import type { Metadata } from 'next';
-import React from 'react';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Search Articles — GenZ Live',
-  description: 'Search across published articles, topics, and editorial content on GenZ Live.',
-  robots: {
-    index: false,
-    follow: true,
-    googleBot: {
-      index: false,
-      follow: true,
-    },
-  },
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Search News',
+  description: 'Search breaking news, in-depth reports, and category topics across GenZ Live.',
+  noIndex: true, // Search results must remain noindex to prevent indexing query variations
+  canonicalPath: '/search',
+});
 
 export default function SearchLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;

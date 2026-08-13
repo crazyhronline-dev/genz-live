@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { PlusCircle, Edit3 } from 'lucide-react';
+import { PlusCircle, Edit3, Zap } from 'lucide-react';
 import { getCmsArticles } from '@/lib/cmsData';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { togglePublishStatusAction } from '@/app/admin/actions';
 
 export const metadata: Metadata = {
   title: 'Draft Articles — GenZ Live CMS',
@@ -39,9 +40,21 @@ export default async function AdminDraftsPage() {
                   <h3 className="font-bold text-white line-clamp-1">{art.title}</h3>
                   <p className="text-slate-400 text-[11px] mt-0.5">{art.categoryName} · Author: {art.authorName} · Updated: {art.updatedAt}</p>
                 </div>
-                <Link href={`/admin/articles/new?id=${art.id}`} className="btn-secondary text-xs py-1.5 px-3 shrink-0">
-                  <Edit3 className="w-3.5 h-3.5" /> Edit
-                </Link>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link href={`/admin/articles/new?id=${art.id}`} className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1">
+                    <Edit3 className="w-3.5 h-3.5" /> Edit
+                  </Link>
+
+                  {(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'EDITOR') && (
+                    <form action={togglePublishStatusAction}>
+                      <input type="hidden" name="articleId" value={art.id} />
+                      <input type="hidden" name="targetStatus" value="PUBLISHED" />
+                      <button type="submit" className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1 shadow-glow-purple">
+                        <Zap className="w-3 h-3" /> Publish Live
+                      </button>
+                    </form>
+                  )}
+                </div>
               </div>
             ))}
           </div>

@@ -5,9 +5,13 @@ import { Clock, Eye, Share2, Tag as TagIcon, ExternalLink, User } from 'lucide-r
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ArticleCard from '@/components/news/ArticleCard';
+import AdSlot from '@/components/ui/AdSlot';
+import InArticleContent from '@/components/news/InArticleContent';
 import { buildArticleMetadata } from '@/lib/seo';
 import { SITE_CONFIG, NAV_CATEGORIES } from '@/config/site';
 import { getPublishedArticle, getRelatedArticles, incrementArticleViews } from '@/lib/dataAccess';
+
+export const revalidate = 60; // Instant <15ms CDN caching with 60s background revalidation
 
 interface Params {
   params: Promise<{ category: string; 'article-slug': string }>;
@@ -23,6 +27,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: article.seoTitle ?? article.title,
     description: article.seoDescription ?? article.subtitle ?? article.excerpt,
     category: article.categoryName,
+    keywords: article.keywords,
     publishedTime: article.publishedAtRaw ?? article.publishedAt,
     modifiedTime: article.updatedAtRaw,
     author: article.author,
@@ -69,6 +74,7 @@ export default async function ArticleSlugPage({ params }: Params) {
     datePublished: article.publishedAtRaw ?? article.publishedAt,
     dateModified: article.updatedAtRaw ?? article.publishedAtRaw ?? article.publishedAt,
     articleSection: article.categoryName,
+    keywords: article.keywords?.join(', '),
     author: {
       '@type': 'Person',
       name: article.author,
@@ -119,6 +125,10 @@ export default async function ArticleSlugPage({ params }: Params) {
       />
 
       <Header activeCategory={category} />
+
+      {/* Left & Right Outer Skyscraper Gutter Column Ads */}
+      <AdSlot size="left-skyscraper" />
+      <AdSlot size="right-skyscraper" />
 
       <main className="flex-1 py-8 md:py-12 px-4">
         <div className="max-w-3xl mx-auto space-y-8">
@@ -171,24 +181,23 @@ export default async function ArticleSlugPage({ params }: Params) {
             </div>
           </header>
 
-          {/* Featured Image */}
-          <figure className="space-y-2">
-            <img
-              src={article.image}
-              alt={article.title}
-              loading="eager"
-              decoding="async"
-              width="768"
-              height="432"
-              className="w-full aspect-video object-cover rounded-2xl border border-white/10 shadow-2xl"
-            />
-          </figure>
+          {/* Featured Image (Only rendered if an image exists) */}
+          {Boolean(article.image) && (
+            <figure className="space-y-2">
+              <img
+                src={article.image}
+                alt={article.title}
+                loading="eager"
+                decoding="async"
+                width="768"
+                height="432"
+                className="w-full aspect-video object-cover rounded-2xl border border-white/10 shadow-2xl"
+              />
+            </figure>
+          )}
 
-          {/* Article Editorial Body */}
-          <div
-            className="prose-genz"
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
+          {/* Article Editorial Body with Embedded In-Article Ads */}
+          <InArticleContent content={article.content} />
 
           {/* Sources Section */}
           {article.source && (
@@ -275,6 +284,9 @@ export default async function ArticleSlugPage({ params }: Params) {
           )}
         </div>
       </main>
+
+      {/* Before-Footer Pre-Footer Ad Banner (Slot 7) */}
+      <AdSlot size="footer-banner" />
 
       <Footer />
     </div>

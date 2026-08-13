@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Clock, Eye, ArrowUpRight, Sparkles } from 'lucide-react';
 import type { Article } from '@/types';
+import { resolveArticleImage } from '@/lib/dataAccess';
 
 interface HeroStoryProps {
   article: Article;
@@ -13,7 +14,7 @@ interface HeroStoryProps {
 }
 
 export default function HeroStory({ article, onSelect, variant = 'large' }: HeroStoryProps) {
-  const href = `/${article.category}/${article.id}`;
+  const href = `/${article.category}/${article.slug || article.id}`;
 
   const handleClick = (e: React.MouseEvent) => {
     if (onSelect) {
@@ -31,7 +32,7 @@ export default function HeroStory({ article, onSelect, variant = 'large' }: Hero
       >
         <div className="relative w-24 h-24 shrink-0">
           <Image
-            src={article.image}
+            src={resolveArticleImage(article.image, article.category, article.title)}
             alt={article.title}
             fill
             sizes="96px"
@@ -65,14 +66,15 @@ export default function HeroStory({ article, onSelect, variant = 'large' }: Hero
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={article.image}
+          src={resolveArticleImage(article.image, article.category, article.title)}
           alt={article.title}
           fill
           priority
-          sizes="(max-width: 1024px) 100vw, 66vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-60"
+          fetchPriority="high"
+          sizes="(max-width: 1024px) 100vw, 800px"
+          className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-100"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" />
       </div>
 
       {/* Badges */}

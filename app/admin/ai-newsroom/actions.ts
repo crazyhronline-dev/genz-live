@@ -8,7 +8,8 @@ import { validateExternalUrl } from '@/lib/security/ssrfGuard';
 import { executeSourceFetch, runAiStoryAnalysis } from '@/lib/aiNewsroomData';
 import prisma from '@/lib/prisma';
 
-const isDbEnabled = process.env.ENABLE_DB_PRISMA === 'true';
+const isDbEnabled = process.env.ENABLE_DB_PRISMA === 'true' || Boolean(process.env.DATABASE_URL);
+
 
 /** 1. ADD NEW NEWS SOURCE ACTION (Admin Only) */
 export async function addSourceAction(formData: FormData): Promise<void> {

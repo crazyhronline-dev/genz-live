@@ -7,13 +7,16 @@
 import prisma from '@/lib/prisma';
 import type { ArticleStatus, UserRole } from '@prisma/client';
 
-const isDbEnabled = process.env.ENABLE_DB_PRISMA === 'true';
+function checkIsDbEnabled(): boolean {
+  return process.env.ENABLE_DB_PRISMA === 'true' || Boolean(process.env.DATABASE_URL);
+}
+
 
 // ----------------------------------------------------------------
 // 1. DASHBOARD OVERVIEW STATISTICS
 // ----------------------------------------------------------------
 export async function getDashboardStats() {
-  if (isDbEnabled) {
+  if (checkIsDbEnabled()) {
     try {
       const [
         totalArticles,
@@ -98,7 +101,7 @@ export async function getCmsArticles(filter: CmsArticleFilter = {}) {
   const limit = filter.limit || 15;
   const skip = (page - 1) * limit;
 
-  if (isDbEnabled) {
+  if (checkIsDbEnabled()) {
     try {
       const whereClause: Record<string, unknown> = {};
 
@@ -186,11 +189,26 @@ export async function getCmsArticles(filter: CmsArticleFilter = {}) {
   };
 }
 
+export async function getCmsArticleById(id: string) {
+  if (checkIsDbEnabled()) {
+    try {
+      const article = await prisma.article.findUnique({
+        where: { id },
+        include: { category: true, author: true },
+      });
+      if (article) return article;
+    } catch {
+      // Fallback
+    }
+  }
+  return null;
+}
+
 // ----------------------------------------------------------------
 // 3. CATEGORIES MANAGEMENT
 // ----------------------------------------------------------------
 export async function getCmsCategories() {
-  if (isDbEnabled) {
+  if (checkIsDbEnabled()) {
     try {
       const dbCategories = await prisma.category.findMany({
         orderBy: { sortOrder: 'asc' },
@@ -226,7 +244,7 @@ export async function getCmsCategories() {
 // 4. TAGS MANAGEMENT
 // ----------------------------------------------------------------
 export async function getCmsTags() {
-  if (isDbEnabled) {
+  if (checkIsDbEnabled()) {
     try {
       const tags = await prisma.tag.findMany({
         orderBy: { name: 'asc' },
@@ -255,7 +273,7 @@ export async function getCmsTags() {
 // 5. AUTHORS MANAGEMENT
 // ----------------------------------------------------------------
 export async function getCmsAuthors() {
-  if (isDbEnabled) {
+  if (checkIsDbEnabled()) {
     try {
       const authors = await prisma.author.findMany({
         orderBy: { name: 'asc' },
@@ -290,7 +308,7 @@ export async function getCmsAuthors() {
 // 6. SOURCES MANAGEMENT
 // ----------------------------------------------------------------
 export async function getCmsSources() {
-  if (isDbEnabled) {
+  if (checkIsDbEnabled()) {
     try {
       const sources = await prisma.source.findMany({
         orderBy: { name: 'asc' },
@@ -320,7 +338,7 @@ export async function getCmsSources() {
 // 7. BREAKING NEWS MANAGEMENT
 // ----------------------------------------------------------------
 export async function getCmsBreakingNews() {
-  if (isDbEnabled) {
+  if (checkIsDbEnabled()) {
     try {
       const items = await prisma.breakingNews.findMany({
         orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
@@ -349,7 +367,7 @@ export async function getCmsBreakingNews() {
 // 8. AUDIT LOGS LISTING
 // ----------------------------------------------------------------
 export async function getCmsAuditLogs(limit: number = 30) {
-  if (isDbEnabled) {
+  if (checkIsDbEnabled()) {
     try {
       const logs = await prisma.auditLog.findMany({
         take: limit,
@@ -381,7 +399,7 @@ export async function getCmsAuditLogs(limit: number = 30) {
 // 9. USER MANAGEMENT (ADMIN ONLY)
 // ----------------------------------------------------------------
 export async function getCmsUsers() {
-  if (isDbEnabled) {
+  if (checkIsDbEnabled()) {
     try {
       const users = await prisma.user.findMany({
         orderBy: { createdAt: 'desc' },

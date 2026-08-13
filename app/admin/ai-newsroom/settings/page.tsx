@@ -3,6 +3,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Settings, ShieldCheck, ArrowLeft, Bot, AlertTriangle } from 'lucide-react';
 
+import { getCurrentUser } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+
 export const metadata: Metadata = {
   title: 'AI Newsroom Settings — GenZ Live Admin',
   robots: { index: false, follow: false },
@@ -13,6 +16,12 @@ export default async function AiSettingsPage({
 }: {
   searchParams: Promise<{ success?: string; error?: string }>;
 }) {
+  const user = await getCurrentUser();
+  if (!user) redirect('/admin/login');
+  if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    redirect('/admin');
+  }
+
   const { success, error } = await searchParams;
 
   const currentProvider = process.env.AI_PROVIDER || 'mock';

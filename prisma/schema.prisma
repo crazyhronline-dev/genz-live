@@ -4,7 +4,8 @@
 // ================================================================
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -172,7 +173,7 @@ model Article {
   status               ArticleStatus @default(DRAFT)
   publishedAt          DateTime?
   scheduledAt          DateTime?     /// For SCHEDULED status
-  featuredImage        String?
+  featuredImage        String?       @db.LongText
   featuredImageAlt     String?
   featuredImageCaption String?
   featuredImageCredit  String?
@@ -185,7 +186,8 @@ model Article {
   likes                Int           @default(0)
   readTime             String?       /// e.g. "4 min read"
 
-  // SEO Override fields
+  // SEO Override & SERP Ranking Keywords
+  keywords             String?       @db.Text
   seoTitle             String?
   seoDescription       String?       @db.Text
   metaTitle            String?

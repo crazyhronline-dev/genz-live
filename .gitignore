@@ -87,3 +87,12 @@ Thumbs.db
 # ----------------------------------------------------------------
 .vercel
 .turbo
+
+# Build archives and local test artifacts
+*.tar.gz
+*.bin
+*.zip
+storageState.json
+test-results/
+/*.png
+/scratch/

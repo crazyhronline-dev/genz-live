@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { PlusCircle, Search, Edit3, ExternalLink } from 'lucide-react';
+import { PlusCircle, Search, Edit3, ExternalLink, Zap, EyeOff } from 'lucide-react';
 import { getCmsArticles } from '@/lib/cmsData';
 import { getCurrentUser } from '@/lib/auth';
 import type { ArticleStatus } from '@prisma/client';
 import { redirect } from 'next/navigation';
+import { togglePublishStatusAction } from '@/app/admin/actions';
 
 export const metadata: Metadata = {
   title: 'Articles Management — GenZ Live CMS',
@@ -109,25 +110,56 @@ export default async function AdminArticlesPage({ searchParams }: SearchParams) 
                   <td className="p-4">{art.authorName}</td>
                   <td className="p-4 font-mono">{art.views}</td>
                   <td className="p-4 text-slate-400">{art.publishedAt}</td>
-                  <td className="p-4 text-right space-x-2">
-                    <Link
-                      href={`/admin/articles/new?id=${art.id}`}
-                      className="inline-flex items-center gap-1 p-1.5 rounded-lg bg-slate-800 hover:bg-brand-purple text-white transition-colors"
-                      title="Edit Article"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </Link>
-                    {art.status === 'PUBLISHED' && (
-                      <a
-                        href={`/${art.categorySlug}/${art.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-cyan transition-colors"
-                        title="View Public Article"
+                  <td className="p-4 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {art.status !== 'PUBLISHED' && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'EDITOR') && (
+                        <form action={togglePublishStatusAction} className="inline">
+                          <input type="hidden" name="articleId" value={art.id} />
+                          <input type="hidden" name="targetStatus" value="PUBLISHED" />
+                          <button
+                            type="submit"
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 text-[10px] font-bold transition-all flex items-center gap-1 shadow-sm"
+                            title="Publish Live Immediately"
+                          >
+                            <Zap className="w-3 h-3 text-emerald-400" /> Publish Live
+                          </button>
+                        </form>
+                      )}
+
+                      {art.status === 'PUBLISHED' && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'EDITOR') && (
+                        <form action={togglePublishStatusAction} className="inline">
+                          <input type="hidden" name="articleId" value={art.id} />
+                          <input type="hidden" name="targetStatus" value="DRAFT" />
+                          <button
+                            type="submit"
+                            className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-amber-600/30 text-amber-400 border border-white/10 text-[10px] font-bold transition-all flex items-center gap-1"
+                            title="Unpublish to Draft"
+                          >
+                            <EyeOff className="w-3 h-3" /> Unpublish
+                          </button>
+                        </form>
+                      )}
+
+                      <Link
+                        href={`/admin/articles/new?id=${art.id}`}
+                        className="inline-flex items-center gap-1 p-1.5 rounded-lg bg-slate-800 hover:bg-brand-purple text-white transition-colors"
+                        title="Edit Article"
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </Link>
+
+                      {art.status === 'PUBLISHED' && (
+                        <a
+                          href={`/${art.categorySlug}/${art.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-cyan transition-colors"
+                          title="View Public Article"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

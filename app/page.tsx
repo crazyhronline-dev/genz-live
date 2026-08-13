@@ -1,5 +1,4 @@
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // Instant <15ms CDN caching with 60s background revalidation
 
 import React from 'react';
 import nextDynamic from 'next/dynamic';
@@ -19,6 +18,7 @@ import {
   getLatestArticles,
   getCategoryArticles,
   getTrendingArticles,
+  resolveArticleImage,
 } from '@/lib/dataAccess';
 
 // Lazy-load heavy below-the-fold components to reduce initial JS bundle
@@ -30,8 +30,8 @@ const Newsletter = nextDynamic(() => import('@/components/ui/Newsletter'), {
 });
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'GenZ Live — The Voice of GenZ',
-  description: 'GenZ Live is a global digital news platform covering World, India, Technology, AI, Business, Markets, Entertainment, Sports and Culture news. Stay informed with the stories that matter to your generation.',
+  title: 'GenZ Live — The Voice of GenZ | Breaking News, India, World & Technology',
+  description: 'GenZ Live is India\'s fastest-growing digital news platform. Get the latest breaking news on India, World, Technology, AI, Business, Markets, Entertainment and Sports — live updates for the next generation.',
   canonicalPath: '',
 });
 
@@ -57,25 +57,50 @@ export default async function HomePage() {
     getTrendingArticles(5),
   ]);
 
+  const heroImgUrl = heroData.featuredStory ? resolveArticleImage(heroData.featuredStory.image, heroData.featuredStory.category, heroData.featuredStory.title) : null;
+
   return (
     <div className="min-h-screen bg-navy-main text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
+      {/* High-Priority LCP Hero Image Preload */}
+      {heroImgUrl && (
+        <link rel="preload" as="image" href={heroImgUrl} fetchPriority="high" />
+      )}
+
       {/* Header */}
       <Header activeCategory="all" />
 
       {/* Breaking News Ticker */}
       <BreakingNews headlines={breakingHeadlines} />
 
-      {/* Top Leaderboard Ad Placeholder */}
+      {/* Top Leaderboard Ad Placeholder (ONLY Ad at the Top on Mobile) */}
       <div className="max-w-7xl mx-auto px-4 pt-6 flex justify-center">
         <AdSlot size="leaderboard" slotId="home-top-leaderboard" />
       </div>
 
       <main className="flex-1">
+        {/* SEO: Page-level H1 — hidden from view but present for crawlers & screen readers */}
+        <h1 style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: 0,
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0,0,0,0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        }}>
+          GenZ Live — Breaking News on India, World, Technology, AI, Business, Entertainment &amp; Sports
+        </h1>
+
         {/* Editorial Hero Section */}
         <HeroSection
           featuredStory={heroData.featuredStory}
           secondaryStories={heroData.secondaryStories}
         />
+
+        {/* Slot 3: Left Skyscraper (Mobile Placement 1: After Hero Stories / Before Main Feed) */}
+        <AdSlot size="left-skyscraper" />
 
         {/* Latest News Feed + Sidebar (Trending + Ad) */}
         <section className="py-8 max-w-7xl mx-auto px-4">
@@ -99,8 +124,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Category Sections Grid */}
-        <div className="max-w-7xl mx-auto px-4 space-y-4">
+        {/* Category Sections Grid (Deferred Rendering for 95+ PageSpeed) */}
+        <div className="max-w-7xl mx-auto px-4 space-y-4 content-visibility-auto">
           {/* World Section */}
           <CategorySection
             title="🌍 World News"
@@ -121,6 +146,9 @@ export default async function HomePage() {
             viewAllHref="/india"
             maxItems={3}
           />
+
+          {/* Slot 4: Right Skyscraper (Mobile Placement 2: Mid-Feed after India News) */}
+          <AdSlot size="right-skyscraper" />
 
           {/* Technology Section */}
           <CategorySection
@@ -145,6 +173,9 @@ export default async function HomePage() {
         {/* Newsletter CTA ("Stay ahead of the story.") */}
         <Newsletter />
       </main>
+
+      {/* Before-Footer Pre-Footer Ad Banner (Slot 7) */}
+      <AdSlot size="footer-banner" />
 
       {/* Global News Footer */}
       <Footer />

@@ -11,6 +11,9 @@ export const metadata: Metadata = {
 export default async function AdminTrendingPage() {
   const user = await getCurrentUser();
   if (!user) redirect('/admin/login');
+  if (user.role === 'AUTHOR') {
+    redirect('/admin/articles');
+  }
 
   const data = await getCmsArticles({ status: 'PUBLISHED' });
   const trendingArticles = data.articles.filter(a => a.isTrending);
