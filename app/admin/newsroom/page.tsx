@@ -7,7 +7,6 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { fetchNewsroomDailyBriefAction } from '@/app/admin/growth-actions';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Newspaper, Sparkles, Clock, DollarSign } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -20,10 +19,7 @@ export default async function NewsroomDailyBriefPage() {
   if (!brief) redirect('/admin');
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans">
-      <AdminSidebar user={{ id: user.id, email: user.email, name: user.name, role: user.role }} />
-
-      <main className="flex-1 p-8 max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="pb-4 border-b border-slate-800 flex items-center justify-between">
           <div>
@@ -104,7 +100,6 @@ export default async function NewsroomDailyBriefPage() {
             </div>
           </div>
         </div>
-      </main>
     </div>
   );
 }

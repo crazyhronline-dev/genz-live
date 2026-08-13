@@ -9,7 +9,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { fetchOverviewAnalyticsAction } from '@/app/admin/analytics-actions';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { BarChart3, TrendingUp, AlertTriangle, FileText, Globe, ArrowUpRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -26,10 +25,7 @@ export default async function AnalyticsDashboardPage() {
   const gscData = data?.gscData || { isConnected: false, statusMessage: '' };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans">
-      <AdminSidebar user={{ id: user.id, email: user.email, name: user.name, role: user.role }} />
-
-      <main className="flex-1 p-8 max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div>
@@ -180,7 +176,6 @@ export default async function AnalyticsDashboardPage() {
             </tbody>
           </table>
         </div>
-      </main>
     </div>
   );
 }

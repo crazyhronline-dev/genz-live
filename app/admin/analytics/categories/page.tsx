@@ -7,7 +7,6 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { fetchCategoryAnalyticsAction } from '@/app/admin/analytics-actions';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { FolderTree } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -19,10 +18,7 @@ export default async function CategoryAnalyticsPage() {
   const categories = (await fetchCategoryAnalyticsAction()) || [];
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans">
-      <AdminSidebar user={{ id: user.id, email: user.email, name: user.name, role: user.role }} />
-
-      <main className="flex-1 p-8 max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
         <div className="pb-4 border-b border-slate-800">
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <FolderTree className="w-7 h-7 text-cyan-400" />
@@ -59,7 +55,6 @@ export default async function CategoryAnalyticsPage() {
             </tbody>
           </table>
         </div>
-      </main>
     </div>
   );
 }

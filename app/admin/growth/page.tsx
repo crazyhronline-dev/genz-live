@@ -7,7 +7,6 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { fetchGrowthHubDataAction } from '@/app/admin/growth-actions';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import SocialDistributionPanel from '@/components/admin/SocialDistributionPanel';
 import { Rocket, Share2, Globe, DollarSign, ExternalLink } from 'lucide-react';
 
@@ -21,10 +20,7 @@ export default async function GrowthHubPage() {
   if (!data) redirect('/admin');
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans">
-      <AdminSidebar user={{ id: user.id, email: user.email, name: user.name, role: user.role }} />
-
-      <main className="flex-1 p-8 max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
         <div className="pb-4 border-b border-slate-800">
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <Rocket className="w-7 h-7 text-cyan-400" />
@@ -102,7 +98,6 @@ export default async function GrowthHubPage() {
             </tbody>
           </table>
         </div>
-      </main>
     </div>
   );
 }
