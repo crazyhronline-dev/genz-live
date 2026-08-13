@@ -33,6 +33,8 @@ import {
   ShieldCheck,
   BarChart3,
   Globe,
+  Newspaper,
+  Rocket,
 } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
 import { logoutAction } from '@/app/admin/actions';
@@ -91,6 +93,8 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
     {
       groupName: 'GROWTH & ANALYTICS',
       items: [
+        { label: 'Newsroom Brief', href: '/admin/newsroom', icon: Newspaper, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
+        { label: 'Audience Growth & Hub', href: '/admin/growth', icon: Rocket, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
         { label: 'Analytics Overview', href: '/admin/analytics', icon: BarChart3, exact: true, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
         { label: 'Author Analytics', href: '/admin/analytics/authors', icon: Users, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
         { label: 'Category Analytics', href: '/admin/analytics/categories', icon: FolderTree, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },

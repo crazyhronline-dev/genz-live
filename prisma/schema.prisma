@@ -790,5 +790,25 @@ model EditorialAlert {
   @@map("editorial_alerts")
 }
 
+// ================================================================
+// PHASE 10 — Audience Growth, Distribution & Revenue Readiness
+// ================================================================
+
+model GrowthMetricSnapshot {
+  id                     String   @id @default(cuid())
+  date                   DateTime @default(now())
+  discoverReadinessScore Int      @default(0)
+  newsReadinessScore     Int      @default(0)
+  revenueReadinessScore  Int      @default(0)
+  activeSubscribersCount Int      @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@map("growth_metric_snapshots")
+}
+
+
+
 
 
