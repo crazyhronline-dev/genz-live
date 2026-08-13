@@ -210,6 +210,8 @@ model Article {
   aiJobs          AIJob[]
   aiDraftMetadata AIDraftMetadata?
   editorialCheck  EditorialCheck?
+  analytics       ArticleAnalytics?
+  seoAudit        SEOHealthAudit?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -686,5 +688,107 @@ model EditorialQuoteCheck {
   @@index([status])
   @@map("editorial_quote_checks")
 }
+
+// ================================================================
+// PHASE 9 — Newsroom Growth, SEO Intelligence & Editorial Analytics
+// ================================================================
+
+model ArticleAnalytics {
+  id                String   @id @default(cuid())
+  articleId         String   @unique
+  article           Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  views24h          Int      @default(0)
+  views7d           Int      @default(0)
+  views30d          Int      @default(0)
+  uniqueVisitors    Int      @default(0)
+  velocityScore     Float    @default(0.0) /// Views per hour acceleration
+  decayScore        Float    @default(0.0) /// Traffic decay indicator (0-100)
+  performanceStatus String   @default("NORMAL") /// PERFORMING_WELL | NORMAL | UNDERPERFORMING | NEEDS_ATTENTION
+  lastViewedAt      DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([articleId])
+  @@index([performanceStatus])
+  @@index([velocityScore])
+  @@index([decayScore])
+  @@map("article_analytics")
+}
+
+model SEOHealthAudit {
+  id                    String   @id @default(cuid())
+  articleId             String   @unique
+  article               Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  status                String   @default("GOOD") /// GOOD | WARNING | ERROR
+  hasMetaTitle          Boolean  @default(true)
+  hasMetaDescription    Boolean  @default(true)
+  hasCanonicalUrl       Boolean  @default(true)
+  hasFeaturedImage      Boolean  @default(true)
+  hasImageAltText       Boolean  @default(true)
+  hasNewsArticleJsonLd  Boolean  @default(true)
+  wordCount             Int      @default(0)
+  internalLinksCount    Int      @default(0)
+  inSitemap             Boolean  @default(true)
+  inNewsSitemap         Boolean  @default(true)
+  indexNowNotified      Boolean  @default(false)
+  issues                Json?    /// Array of issue strings
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([articleId])
+  @@index([status])
+  @@map("seo_health_audits")
+}
+
+model SearchAnalyticsQuery {
+  id          String   @id @default(cuid())
+  query       String   @unique
+  searchCount Int      @default(1)
+  resultCount Int      @default(0)
+  lastSearchedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([query])
+  @@index([searchCount])
+  @@map("search_analytics_queries")
+}
+
+model GSCAnalyticsCache {
+  id          String   @id @default(cuid())
+  pageUrl     String   @db.Text
+  query       String?
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  ctr         Float    @default(0.0)
+  position    Float    @default(0.0)
+  date        DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@map("gsc_analytics_cache")
+}
+
+model EditorialAlert {
+  id        String   @id @default(cuid())
+  title     String
+  message   String   @db.Text
+  type      String   @default("INFO") /// INFO | TRAFFIC_SPIKE | CONTENT_DECAY | SEO_ERROR | FACT_CHECK_WARNING
+  articleId String?
+  isDismissed Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([isDismissed])
+  @@index([createdAt])
+  @@map("editorial_alerts")
+}
+
 
 

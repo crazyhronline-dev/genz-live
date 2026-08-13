@@ -31,6 +31,8 @@ import {
   UserCog,
   History,
   ShieldCheck,
+  BarChart3,
+  Globe,
 } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
 import { logoutAction } from '@/app/admin/actions';
@@ -84,6 +86,15 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
         { label: 'AI Feeds & Sources', href: '/admin/ai-newsroom/sources', icon: Rss, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
         { label: 'AI Generated Drafts', href: '/admin/ai-newsroom/drafts', icon: Sparkles, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
         { label: 'AI Rules & Settings', href: '/admin/ai-newsroom/settings', icon: Cpu, allowedRoles: ['SUPER_ADMIN', 'ADMIN'] },
+      ],
+    },
+    {
+      groupName: 'GROWTH & ANALYTICS',
+      items: [
+        { label: 'Analytics Overview', href: '/admin/analytics', icon: BarChart3, exact: true, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
+        { label: 'Author Analytics', href: '/admin/analytics/authors', icon: Users, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
+        { label: 'Category Analytics', href: '/admin/analytics/categories', icon: FolderTree, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
+        { label: 'Technical SEO Health', href: '/admin/seo', icon: Globe, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
       ],
     },
     {
