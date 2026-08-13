@@ -362,6 +362,9 @@ export async function updateArticleStatusAction(articleId: string, newStatus: Ar
         revalidatePath('/admin/articles/published');
         revalidatePath('/admin/articles/review');
         revalidatePath('/admin/articles/scheduled');
+        if (newStatus === 'PUBLISHED' && existing?.slug && existing.category?.slug) {
+          notifyIndexNow(`/${existing.category.slug}/${existing.slug}`).catch(() => {});
+        }
       } catch {}
     } catch (e) {
       if ((e as Error).message === 'NEXT_REDIRECT' || (e as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw e;
