@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import ArticlePreview from '@/components/admin/ArticlePreview';
 import KeywordSuggester from '@/components/admin/KeywordSuggester';
+import EditorialCheckPanel from '@/components/admin/EditorialCheckPanel';
 import { Save, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { saveArticleAction } from '@/app/admin/actions';
 import { resolveArticleImage, getCategoryFallbackImage } from '@/lib/dataAccess';
@@ -446,6 +447,15 @@ export default function ArticleEditorForm({
                 <span>Include in Breaking News Ticker</span>
               </label>
             </div>
+
+            {articleToEdit && (
+              <EditorialCheckPanel
+                articleId={articleToEdit.id}
+                articleTitle={articleToEdit.title}
+                articleContent={articleToEdit.content}
+                userRole={userRole}
+              />
+            )}
 
             {/* ── Preview Button (reads live form state) ────────────────── */}
             <ArticlePreview

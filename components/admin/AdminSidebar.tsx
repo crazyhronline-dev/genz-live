@@ -30,6 +30,7 @@ import {
   Cpu,
   UserCog,
   History,
+  ShieldCheck,
 } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
 import { logoutAction } from '@/app/admin/actions';
@@ -69,6 +70,7 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
         { label: 'All Articles', href: '/admin/articles', icon: FileText, exact: true, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'] },
         { label: 'Drafts', href: '/admin/articles/drafts', icon: FileEdit, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'] },
         { label: 'Review Queue', href: '/admin/articles/review', icon: Clock, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
+        { label: 'Fact-Check Queue', href: '/admin/editorial-checks', icon: ShieldCheck, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
         { label: 'Scheduled', href: '/admin/articles/scheduled', icon: Clock, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'] },
         { label: 'Published', href: '/admin/articles/published', icon: CheckCircle2, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'] },
         { label: 'Media Library', href: '/admin/media', icon: ImageIcon, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'] },
