@@ -432,6 +432,47 @@ export async function deleteCategoryAction(id: string): Promise<void> {
   redirect('/admin/categories');
 }
 
+/** 6B. UPDATE CATEGORY ACTION */
+export async function updateCategoryAction(formData: FormData): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) redirect('/admin/login');
+
+  const id = (formData.get('id') as string)?.trim();
+  const name = (formData.get('name') as string)?.trim();
+  let slug = (formData.get('slug') as string)?.trim();
+  const description = (formData.get('description') as string)?.trim() || null;
+
+  if (!id || !name) {
+    redirect('/admin/categories?error=Category+ID+and+Name+are+required.');
+  }
+
+  if (!slug) {
+    slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  } else {
+    slug = slug.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  if (checkIsDbEnabled()) {
+    try {
+      const updated = await prisma.category.update({
+        where: { id },
+        data: { name, slug, description },
+      });
+      await logAuditAction({
+        userId: user.id,
+        action: 'CATEGORY_UPDATED',
+        entityType: 'Category',
+        entityId: updated.id,
+        newData: { name, slug, description },
+      });
+    } catch {
+      // Ignore
+    }
+  }
+
+  redirect('/admin/categories');
+}
+
 /** 7. CREATE TAG ACTION */
 export async function createTagAction(formData: FormData): Promise<void> {
   const user = await getCurrentUser();
