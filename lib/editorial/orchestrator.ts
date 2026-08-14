@@ -84,13 +84,19 @@ export function sanitizeSourceContent(rawContent: string): string {
     .replace(/<iframe[^>]*>([\s\S]*?)<\/iframe>/gi, '');
 }
 
+export interface EditorialMetaDataInput {
+  featuredImage?: string | null;
+  featuredImageAlt?: string | null;
+}
+
 /**
  * Master Server-Side Orchestrator function to execute all editorial checks.
  */
 export async function executeEditorialCheck(
   headline: string,
   content: string,
-  sourcesInput: EditorialSourceInput[] = []
+  sourcesInput: EditorialSourceInput[] = [],
+  metaInput?: EditorialMetaDataInput
 ): Promise<EditorialCheckReport> {
   // 1. Sanitize source content and filter SSRF URLs
   const sanitizedSources = sourcesInput
@@ -112,6 +118,40 @@ export async function executeEditorialCheck(
   // 3. Synthesize risk flags and suggestions
   const riskFlags: string[] = [];
   const suggestedAttributions: string[] = [];
+  let scoreDeductions = 0;
+
+  // Word count & thin content check
+  const plainWords = (content || '').replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean);
+  const wordCount = plainWords.length;
+
+  if (wordCount < 100) {
+    riskFlags.push(`❌ Thin Content Alert: Article contains only ${wordCount} word(s). Minimum 200 words required for publication.`);
+    scoreDeductions += 35;
+  } else if (wordCount < 200) {
+    riskFlags.push(`⚠️ Short Article Warning: Article contains ${wordCount} words (recommend expanding to 200+ words).`);
+    scoreDeductions += 15;
+  }
+
+  // Image & Alt text compliance check
+  if (metaInput?.featuredImage) {
+    const altText = metaInput.featuredImageAlt?.trim() || '';
+    if (!altText) {
+      riskFlags.push(`⚠️ Missing Image ALT Text: Featured header image lacks descriptive ALT text for accessibility & SEO.`);
+      scoreDeductions += 15;
+    } else if (['test', 'image', 'photo', 'img', 'picture'].includes(altText.toLowerCase())) {
+      riskFlags.push(`⚠️ Generic Image ALT Text: Featured image ALT text ("${altText}") is non-descriptive.`);
+      scoreDeductions += 10;
+    }
+  } else {
+    riskFlags.push(`⚠️ Missing Featured Image: No header image attached to article.`);
+    scoreDeductions += 10;
+  }
+
+  // Test / Placeholder Title check
+  if (/\b(test|sample|draft|demo|dummy)\b/i.test(headline)) {
+    riskFlags.push(`⚠️ Placeholder Title Flag: Article title contains test/draft keywords ("${headline}").`);
+    scoreDeductions += 15;
+  }
 
   if (quoteResult.unverifiedCount > 0) {
     riskFlags.push(`${quoteResult.unverifiedCount} unverified quote(s) detected without source confirmation.`);
@@ -133,24 +173,23 @@ export async function executeEditorialCheck(
     if (c.suggestedAttribution) suggestedAttributions.push(c.suggestedAttribution);
   });
 
-  // Calculate overall weighted score (0 - 100)
-  const overallScore = Math.max(
-    0,
-    Math.round(
-      factResult.factScore * 0.25 +
-      originalityResult.originalityScore * 0.25 +
-      quoteResult.quoteScore * 0.20 +
-      statResult.statisticsScore * 0.15 +
-      (100 - allegationResult.aiRiskScore) * 0.15
-    )
+  // Calculate overall weighted score (0 - 100) with deductions
+  const baseScore = Math.round(
+    factResult.factScore * 0.25 +
+    originalityResult.originalityScore * 0.25 +
+    quoteResult.quoteScore * 0.20 +
+    statResult.statisticsScore * 0.15 +
+    (100 - allegationResult.aiRiskScore) * 0.15
   );
+
+  const overallScore = Math.max(0, baseScore - scoreDeductions);
 
   let status: EditorialCheckReport['status'] = 'PASSED';
   let finalRecommendation = 'READY FOR EDITORIAL APPROVAL';
 
-  if (quoteResult.unverifiedCount > 0 || allegationResult.criticalCount > 0 || originalityResult.sourceDependencyScore >= 80) {
+  if (quoteResult.unverifiedCount > 0 || allegationResult.criticalCount > 0 || originalityResult.sourceDependencyScore >= 80 || wordCount < 50) {
     status = 'FAILED';
-    finalRecommendation = 'DO NOT PUBLISH UNTIL ISSUES ARE RESOLVED';
+    finalRecommendation = 'DO NOT PUBLISH UNTIL CRITICAL ISSUES ARE RESOLVED';
   } else if (overallScore < 75 || riskFlags.length > 0) {
     status = 'REVIEW_REQUIRED';
     finalRecommendation = 'HUMAN EDITORIAL REVIEW REQUIRED';

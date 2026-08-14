@@ -41,8 +41,16 @@ export async function runEditorialCheckAction(
       });
     }
 
-    // Run master orchestrator
-    const report = await executeEditorialCheck(article.title, article.content, combinedSources);
+    // Run master orchestrator with metadata
+    const report = await executeEditorialCheck(
+      article.title,
+      article.content,
+      combinedSources,
+      {
+        featuredImage: article.featuredImage,
+        featuredImageAlt: article.featuredImageAlt,
+      }
+    );
 
     // Save report to database
     await saveEditorialCheckResult(articleId, report, user.id);

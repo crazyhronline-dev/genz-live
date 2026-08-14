@@ -76,11 +76,14 @@ test.describe('Phase 8: Editorial Fact-Check & Originality Checker Test Suite', 
   });
 
   test('9. Full Master Orchestration must generate valid Editorial Check Report', async () => {
-    const headline = 'GenZ Live Exclusive: AI Breaking News';
-    const content = 'Narendra Modi addressed students in Delhi on Monday. The company announced $5 billion in revenue.';
-    const sources = [{ name: 'Reuters', content: 'Narendra Modi addressed students in Delhi on Monday. Revenue reached $5 billion.' }];
+    const headline = 'GenZ Live Exclusive: AI Breaking News Expansion in Tech';
+    const content = `Narendra Modi addressed students in Delhi on Monday during the annual digital literacy summit. The company announced $5 billion in revenue for the fiscal quarter ending June. Digital infrastructure investments across top metropolitan areas continue to expand rapidly as technology adoption accelerates among young citizens. Industry experts emphasize that ongoing research into artificial intelligence and sustainable tech hardware will drive international economic development over the next decade. Modern newsrooms are increasingly adopting AI-assisted editorial workflows to enhance fact verification and reporting speed. Editors remain responsible for evaluating factual accuracy, confirming primary sources, and enforcing ethical journalism standards before publishing stories. With robust safety gates in place, digital news platforms can deliver reliable coverage to millions of readers worldwide.`;
+    const sources = [{ name: 'Reuters', content: `Narendra Modi addressed students in Delhi on Monday during the annual digital literacy summit. The company announced $5 billion in revenue for the fiscal quarter ending June. Digital infrastructure investments across top metropolitan areas continue to expand rapidly.` }];
 
-    const report = await executeEditorialCheck(headline, content, sources);
+    const report = await executeEditorialCheck(headline, content, sources, {
+      featuredImage: 'https://genz-live.com/images/news.jpg',
+      featuredImageAlt: 'Narendra Modi addressing students during digital summit in Delhi',
+    });
     expect(report.overallScore).toBeGreaterThan(50);
     expect(report.factScore).toBeGreaterThan(50);
     expect(report.claims.length).toBeGreaterThan(0);
