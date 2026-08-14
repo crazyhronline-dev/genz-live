@@ -35,6 +35,7 @@ import {
   Globe,
   Newspaper,
   Rocket,
+  DollarSign,
 } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
 import { logoutAction } from '@/app/admin/actions';
@@ -93,6 +94,7 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
     {
       groupName: 'GROWTH & ANALYTICS',
       items: [
+        { label: 'AdSense Readiness', href: '/admin/adsense-readiness', icon: DollarSign, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
         { label: 'Newsroom Brief', href: '/admin/newsroom', icon: Newspaper, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
         { label: 'Audience Growth & Hub', href: '/admin/growth', icon: Rocket, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },
         { label: 'Analytics Overview', href: '/admin/analytics', icon: BarChart3, exact: true, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'EDITOR'] },

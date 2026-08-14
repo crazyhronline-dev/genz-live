@@ -808,6 +808,26 @@ model GrowthMetricSnapshot {
   @@map("growth_metric_snapshots")
 }
 
+model AdSenseReadinessAudit {
+  id                    String   @id @default(cuid())
+  overallScore          Int      @default(0)
+  status                String   @default("NOT_READY") /// READY_TO_APPLY | ALMOST_READY | NOT_READY
+  categoryScores        Json     /// { content: number, trust: number, legal: number, technical: number, seo: number }
+  criticalBlockersCount Int      @default(0)
+  warningsCount         Int      @default(0)
+  manualReviewsCount    Int      @default(0)
+  checkResults          Json     /// Detailed array of 30 checks with evidence & recommendations
+  articleCount          Int      @default(0)
+  publishedArticleCount Int      @default(0)
+  durationMs            Int      @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("adsense_readiness_audits")
+}
+
+
 
 
 
