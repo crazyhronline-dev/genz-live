@@ -145,30 +145,34 @@ export default function EditorialCheckPanel({
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6 my-6 text-slate-100 font-sans">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xl space-y-4 my-6 text-slate-100 font-sans overflow-hidden min-w-0 w-full">
       {/* Panel Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-gradient-to-br from-violet-600/30 to-purple-600/10 text-violet-400 rounded-xl border border-violet-500/30 shadow-inner">
-            <ShieldCheck className="w-6 h-6" />
+      <div className="flex flex-col gap-3 pb-4 border-b border-slate-800">
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="p-2.5 bg-gradient-to-br from-violet-600/30 to-purple-600/10 text-violet-400 rounded-xl border border-violet-500/30 shadow-inner shrink-0">
+            <ShieldCheck className="w-5 h-5" />
           </div>
-          <div>
-            <h3 className="text-base font-black text-white tracking-tight flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-black text-white tracking-tight leading-snug">
               Editorial Fact-Check & Originality Scanner
             </h3>
-            <p className="text-xs text-slate-400">
-              Automated claim extraction, quote verification, shingle originality analysis, and defamation safety gate
+            <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+              Factual claims, quote verification, shingle originality, and defamation safety gate
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {report && getStatusBadge(report.status)}
+        {/* Action Controls & Status */}
+        <div className="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-slate-800/60">
+          <div>
+            {report && getStatusBadge(report.status)}
+          </div>
+
           <button
             type="button"
             onClick={handleRunCheck}
             disabled={loading}
-            className="px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 shadow-lg shadow-violet-600/20 transition-all disabled:opacity-50"
+            className="px-3.5 py-1.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-violet-600/20 transition-all disabled:opacity-50 shrink-0 ml-auto"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Analyzing...' : report ? 'Re-Run Check' : 'Run Editorial Check'}
@@ -178,10 +182,10 @@ export default function EditorialCheckPanel({
 
       {/* Error Alert Banner */}
       {errorMessage && (
-        <div className="p-4 bg-rose-950/60 border border-rose-500/40 rounded-xl text-xs text-rose-300 flex items-center justify-between">
+        <div className="p-3 bg-rose-950/60 border border-rose-500/40 rounded-xl text-xs text-rose-300 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertOctagon className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>{errorMessage}</span>
+            <span className="truncate">{errorMessage}</span>
           </div>
           <button type="button" onClick={() => setErrorMessage(null)} className="text-rose-400 font-bold px-2">✕</button>
         </div>
@@ -189,13 +193,13 @@ export default function EditorialCheckPanel({
 
       {/* Analysis Step Loading Bar */}
       {loading && analysisStep && (
-        <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+        <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-violet-400 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-violet-400 animate-ping" />
+            <span className="font-bold text-violet-400 flex items-center gap-2 truncate">
+              <span className="w-2 h-2 rounded-full bg-violet-400 animate-ping shrink-0" />
               {analysisStep}
             </span>
-            <span className="font-mono text-slate-500 text-[10px]">VERIFYING...</span>
+            <span className="font-mono text-slate-500 text-[10px] shrink-0">VERIFYING...</span>
           </div>
           <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
             <div className="bg-gradient-to-r from-violet-500 to-cyan-400 h-full animate-pulse w-3/4" />
@@ -208,35 +212,35 @@ export default function EditorialCheckPanel({
         <button
           type="button"
           onClick={() => setShowSourceDrawer(!showSourceDrawer)}
-          className="w-full p-3 text-xs font-bold text-slate-300 hover:text-white flex items-center justify-between transition-colors"
+          className="w-full p-2.5 text-xs font-bold text-slate-300 hover:text-white flex items-center justify-between transition-colors"
         >
-          <span className="flex items-center gap-2">
-            <Plus className="w-3.5 h-3.5 text-violet-400" />
-            Attach Reference Article for Originality Comparison (Optional)
+          <span className="flex items-center gap-1.5 truncate">
+            <Plus className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+            Attach Reference Source (Optional)
           </span>
-          <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${showSourceDrawer ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-slate-500 shrink-0 transition-transform ${showSourceDrawer ? 'rotate-180' : ''}`} />
         </button>
 
         {showSourceDrawer && (
-          <div className="p-4 border-t border-slate-800/80 space-y-3 bg-slate-950/40">
+          <div className="p-3 border-t border-slate-800/80 space-y-2.5 bg-slate-950/40">
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 mb-1">Source Name (e.g., Reuters, AP, TechCrunch)</label>
+              <label className="block text-[10px] font-bold text-slate-400 mb-1">Source Name (e.g., Reuters, AP)</label>
               <input
                 type="text"
                 value={sourceName}
                 onChange={e => setSourceName(e.target.value)}
                 placeholder="Reuters"
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 mb-1">Reference Article Text (Paste raw source text for overlap check)</label>
+              <label className="block text-[10px] font-bold text-slate-400 mb-1">Reference Text</label>
               <textarea
                 rows={3}
                 value={sourceContent}
                 onChange={e => setSourceContent(e.target.value)}
-                placeholder="Paste external report or official press release content here..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
+                placeholder="Paste reference text here..."
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
               />
             </div>
           </div>
@@ -245,22 +249,22 @@ export default function EditorialCheckPanel({
 
       {/* No Report Placeholder State */}
       {!report && !loading && (
-        <div className="p-8 border border-dashed border-slate-800 rounded-xl text-center space-y-2">
-          <Info className="w-8 h-8 text-slate-600 mx-auto" />
-          <h4 className="text-xs font-bold text-slate-300">No Editorial Check Generated Yet</h4>
+        <div className="p-6 border border-dashed border-slate-800 rounded-xl text-center space-y-2">
+          <Info className="w-6 h-6 text-slate-600 mx-auto" />
+          <h4 className="text-xs font-bold text-slate-300">No Editorial Check Run Yet</h4>
           <p className="text-[11px] text-slate-400 max-w-md mx-auto">
-            Click <strong className="text-violet-400">&quot;Run Editorial Check&quot;</strong> above to extract claims, check originality against sources, and verify statistics prior to publishing.
+            Click <strong className="text-violet-400">&quot;Run Editorial Check&quot;</strong> above to extract claims, check originality, and verify statistics prior to publishing.
           </p>
         </div>
       )}
 
       {/* Report Details & Scorecard */}
       {report && (
-        <div className="space-y-5">
-          {/* Navigation Tabs */}
-          <div className="flex border-b border-slate-800 gap-1 overflow-x-auto">
+        <div className="space-y-4">
+          {/* Navigation Tabs (Smooth Horizontal Scroll) */}
+          <div className="flex border-b border-slate-800 gap-1 overflow-x-auto pb-0.5 text-xs font-bold scrollbar-none">
             {[
-              { id: 'scorecard', label: 'Scorecard Overview', icon: ShieldCheck },
+              { id: 'scorecard', label: 'Scorecard', icon: ShieldCheck },
               { id: 'claims', label: `Claims (${report.claims?.length || 0})`, icon: FileText },
               { id: 'originality', label: `Originality (${report.originalityScore}%)`, icon: TrendingUp },
               { id: 'quotes', label: `Quotes (${report.quotes?.length || 0})`, icon: QuoteIcon },
@@ -272,13 +276,13 @@ export default function EditorialCheckPanel({
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id as 'scorecard' | 'claims' | 'originality' | 'quotes' | 'allegations')}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold border-b-2 transition-all shrink-0 ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold border-b-2 transition-all shrink-0 whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-violet-500 text-violet-400 bg-violet-500/10'
                       : 'border-transparent text-slate-400 hover:text-white'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
                   {tab.label}
                 </button>
               );
@@ -287,24 +291,24 @@ export default function EditorialCheckPanel({
 
           {/* TAB 1: SCORECARD OVERVIEW */}
           {activeTab === 'scorecard' && (
-            <div className="space-y-4">
-              {/* 4 Metrics Scorecard */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-center">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Overall Score</span>
-                  <span className="text-2xl font-black text-white mt-1 block">{report.overallScore}<span className="text-xs text-slate-500">/100</span></span>
+            <div className="space-y-3">
+              {/* 4 Metrics Scorecard (2x2 Grid for Clean Proportions) */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-center min-w-0">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 block truncate">Overall Score</span>
+                  <span className="text-xl font-black text-white mt-0.5 block">{report.overallScore}<span className="text-[10px] text-slate-500">/100</span></span>
                 </div>
-                <div className="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-center">
-                  <span className="text-[10px] uppercase font-bold text-emerald-400 block">Fact Accuracy</span>
-                  <span className="text-2xl font-black text-emerald-400 mt-1 block">{report.factScore}%</span>
+                <div className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-center min-w-0">
+                  <span className="text-[9px] uppercase font-bold text-emerald-400 block truncate">Fact Accuracy</span>
+                  <span className="text-xl font-black text-emerald-400 mt-0.5 block">{report.factScore}%</span>
                 </div>
-                <div className="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-center">
-                  <span className="text-[10px] uppercase font-bold text-cyan-400 block">Originality Score</span>
-                  <span className="text-2xl font-black text-cyan-400 mt-1 block">{report.originalityScore}%</span>
+                <div className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-center min-w-0">
+                  <span className="text-[9px] uppercase font-bold text-cyan-400 block truncate">Originality</span>
+                  <span className="text-xl font-black text-cyan-400 mt-0.5 block">{report.originalityScore}%</span>
                 </div>
-                <div className="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-center">
-                  <span className="text-[10px] uppercase font-bold text-amber-400 block">Source Dependency</span>
-                  <span className="text-2xl font-black text-amber-400 mt-1 block">{report.sourceDependencyScore}%</span>
+                <div className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-center min-w-0">
+                  <span className="text-[9px] uppercase font-bold text-amber-400 block truncate">Dependency</span>
+                  <span className="text-xl font-black text-amber-400 mt-0.5 block">{report.sourceDependencyScore}%</span>
                 </div>
               </div>
 
