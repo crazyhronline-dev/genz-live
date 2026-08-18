@@ -85,20 +85,31 @@ function baseMetadata(): Metadata {
       shortcut: '/favicon.ico',
     },
 
-    // Crawler directives (default: index + follow)
-    robots: {
-      index: true,
-      follow: true,
-      nocache: false,
-      googleBot: {
-        index: true,
-        follow: true,
-        noimageindex: false,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
+    // Crawler directives (respects SITE_NO_INDEX environment variable)
+    robots: process.env.SITE_NO_INDEX === 'true'
+      ? {
+          index: false,
+          follow: false,
+          nocache: true,
+          googleBot: {
+            index: false,
+            follow: false,
+            noimageindex: true,
+          },
+        }
+      : {
+          index: true,
+          follow: true,
+          nocache: false,
+          googleBot: {
+            index: true,
+            follow: true,
+            noimageindex: false,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+          },
+        },
 
     // Open Graph
     openGraph: {
@@ -229,8 +240,18 @@ export function buildPageMetadata(opts: PageMetadataOptions = {}): Metadata {
     images: [ogImage],
   };
 
-  const robots: Metadata['robots'] = noIndex
-    ? { index: false, follow: true } // noindex but allow following links
+  const isGlobalNoIndex = process.env.SITE_NO_INDEX === 'true';
+  const robots: Metadata['robots'] = (noIndex || isGlobalNoIndex)
+    ? {
+        index: false,
+        follow: false,
+        nocache: true,
+        googleBot: {
+          index: false,
+          follow: false,
+          noimageindex: true,
+        },
+      }
     : base.robots;
 
   return {

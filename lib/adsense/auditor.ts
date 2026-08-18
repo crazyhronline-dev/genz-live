@@ -617,6 +617,8 @@ export async function runAdSenseReadinessAudit(): Promise<AdSenseAuditReport> {
   });
 
   // CHECK 29 — Indexing / Accidental Noindex Scan (4 pts)
+  const isNoIndexActive = process.env.SITE_NO_INDEX === 'true';
+  const check29Status: CheckStatus = isNoIndexActive ? 'WARN' : 'PASS';
   checks.push({
     id: 'CHECK_29',
     checkNumber: 29,
@@ -624,12 +626,16 @@ export async function runAdSenseReadinessAudit(): Promise<AdSenseAuditReport> {
     category: 'SEO',
     categoryName: 'SEO & Indexing',
     checkType: 'OFFICIAL_POLICY',
-    status: 'PASS',
-    isCritical: true,
-    score: 4,
+    status: check29Status,
+    isCritical: false,
+    score: isNoIndexActive ? 0 : 4,
     maxScore: 4,
-    evidence: 'Public article and taxonomy routes allow search indexing (`index: true, follow: true`). Admin routes correctly set to noindex.',
-    recommendation: 'Ensure no public news pages accidentally include noindex tags.',
+    evidence: isNoIndexActive
+      ? 'Global No-Index is ACTIVE (SITE_NO_INDEX=true). All public pages output `<meta name="robots" content="noindex, nofollow">` and `/robots.txt` disallows all crawlers.'
+      : 'Public article and taxonomy routes allow search indexing (`index: true, follow: true`). Admin routes correctly set to noindex.',
+    recommendation: isNoIndexActive
+      ? 'Global No-Index is intentionally active as requested. To allow search engine indexing in the future, set SITE_NO_INDEX=false in .env.'
+      : 'Ensure no public news pages accidentally include noindex tags.',
   });
 
   // CHECK 30 — Thin / Empty / Demo Content (4 pts)

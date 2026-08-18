@@ -7,6 +7,18 @@ import { SITE_CONFIG } from '@/config/site';
 
 export default function robots(): MetadataRoute.Robots {
   const domain = SITE_CONFIG.domain;
+  const isGlobalNoIndex = process.env.SITE_NO_INDEX === 'true';
+
+  if (isGlobalNoIndex) {
+    return {
+      rules: [
+        {
+          userAgent: '*',
+          disallow: '/',
+        },
+      ],
+    };
+  }
 
   return {
     rules: [
